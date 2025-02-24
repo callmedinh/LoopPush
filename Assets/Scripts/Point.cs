@@ -1,6 +1,7 @@
 using UnityEngine;
+using System;
 
-public class Point : MonoBehaviour
+public class Point
 {
     public int X { get; set; }
 

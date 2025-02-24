@@ -3,11 +3,8 @@ using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 
-// Token: 0x02000002 RID: 2
 public class BoxController : MonoBehaviour
 {
-    // Token: 0x17000001 RID: 1
-    // (get) Token: 0x06000001 RID: 1 RVA: 0x00002050 File Offset: 0x00000250
     public Point P
     {
         get
@@ -16,8 +13,6 @@ public class BoxController : MonoBehaviour
         }
     }
 
-    // Token: 0x17000002 RID: 2
-    // (get) Token: 0x06000002 RID: 2 RVA: 0x00002058 File Offset: 0x00000258
     public bool IsSettled
     {
         get
@@ -26,7 +21,6 @@ public class BoxController : MonoBehaviour
         }
     }
 
-    // Token: 0x06000003 RID: 3 RVA: 0x00002060 File Offset: 0x00000260
     public void Init(Vector2Int position)
     {
         this.point = MapManager.Instance.GetPoint(position.x, position.y);
@@ -35,7 +29,7 @@ public class BoxController : MonoBehaviour
         this.isSettled = false;
     }
 
-    /*
+
     public void Move(Direction dir)
     {
         Point point = null;
@@ -68,7 +62,7 @@ public class BoxController : MonoBehaviour
         if (flag)
         {
             base.transform.DOMove(point.TelePoint.Position, 0.1f, false);
-            base.StartCoroutine(this.PlayTeleEffect(point.Position));
+            //base.StartCoroutine(this.PlayTeleEffect(point.Position));
         }
         else
         {
@@ -83,15 +77,15 @@ public class BoxController : MonoBehaviour
         }
         this.isSettled = true;
         BoxManager.Instance.DetectBoxState();
-        MMFeedbacks mmfeedbacks = this.settleFeedback;
-        if (mmfeedbacks == null)
-        {
-            return;
-        }
-        mmfeedbacks.PlayFeedbacks();
+        //MMFeedbacks mmfeedbacks = this.settleFeedback;
+        //if (mmfeedbacks == null)
+        //{
+        //    return;
+        //}
+        //mmfeedbacks.PlayFeedbacks();
     }
 
-    // Token: 0x06000005 RID: 5 RVA: 0x00002241 File Offset: 0x00000441
+    /*
     private IEnumerator PlayTeleEffect(Vector3 pos)
     {
         yield return new WaitForSeconds(0.1f);
@@ -104,7 +98,7 @@ public class BoxController : MonoBehaviour
         yield break;
     }
 
-    // Token: 0x06000006 RID: 6 RVA: 0x00002258 File Offset: 0x00000458
+        */
     public bool CanMove(Direction dir)
     {
         Point point = null;
@@ -125,12 +119,9 @@ public class BoxController : MonoBehaviour
         }
         return point != null;
     }
-    */
 
-    // Token: 0x04000001 RID: 1
     private Point point;
 
-    // Token: 0x04000002 RID: 2
     private bool isSettled;
 
     /*

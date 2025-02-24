@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6078295012240864100}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shadow: {fileID: 0}
-  rendererTransform: {fileID: 0}
+  rendererTransform: {fileID: 1820754498907752212}
   shadowRenderTransform: {fileID: 0}
   animator: {fileID: 0}
   shadowAnimator: {fileID: 0}
