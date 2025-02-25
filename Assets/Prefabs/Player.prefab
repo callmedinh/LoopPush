@@ -102,6 +102,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shadow: {fileID: 0}
   rendererTransform: {fileID: 1820754498907752212}
-  shadowRenderTransform: {fileID: 0}
+  shadowRenderTransform: {fileID: 2029256792130220513, guid: cc8d96020ba766543a4aa3ead46ab670, type: 3}
   animator: {fileID: 0}
   shadowAnimator: {fileID: 0}
