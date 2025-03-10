@@ -176,22 +176,22 @@ public class PlayerController : MonoBehaviour
         }
         if (_point != null)
         {
-            if (point.isBox)
+            if (_point.isBox)
             {
-                if (!BoxManager.Instance.GetBox(point).CanMove(dir))
+                if (!BoxManager.Instance.GetBox(_point).CanMove(dir))
                 {
                     return;
                 }
-                BoxManager.Instance.GetBox(point).Move(dir);
+                BoxManager.Instance.GetBox(_point).Move(dir);
                 //if (dir == Direction.Left || dir == Direction.Right)
                 //{
                 //    this.animator.SetTrigger("Push");
                 //}
             }
-            //if (_point.isStar)
-            //{
-            //    MapManager.Instance.DestroyStar();
-            //}
+            if (_point.isStar)
+            {
+                MapManager.Instance.DestroyStar();
+            }
             bool flag = false;
             if (_point.isTele && !_point.TelePoint.isBox)
             {
@@ -211,7 +211,7 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                this.shadow.DOMove(point.Position, 0.1f, false);
+                this.shadow.DOMove(_point.Position, 0.1f, false);
             }
             //MMFeedbacks mmfeedbacks = this.shadowMoveFeedback;
             //if (mmfeedbacks != null)
@@ -244,21 +244,21 @@ public class PlayerController : MonoBehaviour
     //    yield break;
     //}
 
-    //public void SkipTurn()
-    //{
-    //    if (this.lastLoopActions != null)
-    //    {
-    //        this.ShadowMove(this.lastLoopActions[this.stepTotal - this.stepLeft]);
-    //    }
-    //    this.currentLoopActions[this.stepTotal - this.stepLeft] = Direction.None;
-    //    //Object.FindObjectOfType<RippleEffect>().Emit(Camera.main.WorldToViewportPoint(base.transform.position));
-    //    //MMFeedbacks mmfeedbacks = this.skipFeedback;
-    //    //if (mmfeedbacks != null)
-    //    //{
-    //    //    mmfeedbacks.PlayFeedbacks();
-    //    //}
-    //    this.StepCost();
-    //}
+    public void SkipTurn()
+    {
+        if (this.lastLoopActions != null)
+        {
+            this.ShadowMove(this.lastLoopActions[this.stepTotal - this.stepLeft]);
+        }
+        this.currentLoopActions[this.stepTotal - this.stepLeft] = Direction.None;
+        //Object.FindObjectOfType<RippleEffect>().Emit(Camera.main.WorldToViewportPoint(base.transform.position));
+        //MMFeedbacks mmfeedbacks = this.skipFeedback;
+        //if (mmfeedbacks != null)
+        //{
+        //    mmfeedbacks.PlayFeedbacks();
+        //}
+        this.StepCost();
+    }
 
     private void StepCost()
     {
@@ -283,6 +283,7 @@ public class PlayerController : MonoBehaviour
     private void OverLoop()
     {
         this.lastLoopActions = this.currentLoopActions;
+        Debug.Log(lastLoopActions);
         MapManager.Instance.LoopMapInit();
         //CameraController.Instance.PlayReloadFeedback();
         //GamePanelManager.Instance.ClearNodeStep();

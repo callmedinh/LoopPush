@@ -38,14 +38,14 @@ public class MapManager : MonoBehaviour
         {
             this.InstantiateBlock(map.blocks[i]);
         }
-        //for (int j = 0; j < map.teleportBlocks.Length; j++)
-        //{
-        //    Point p;
-        //    this.InstantiateBlock(map.teleportBlocks[j].block1, out p);
-        //    Point p2;
-        //    this.InstantiateBlock(map.teleportBlocks[j].block2, out p2);
-        //    this.BindTeleportInfo(p, p2);
-        //}
+        for (int j = 0; j < map.teleportBlocks.Length; j++)
+        {
+            Point p;
+            this.InstantiateBlock(map.teleportBlocks[j].block1, out p);
+            Point p2;
+            this.InstantiateBlock(map.teleportBlocks[j].block2, out p2);
+            this.BindTeleportInfo(p, p2);
+        }
         PlayerController.Instance.Init(map.playerPosition, map.steps);
         this.InstantiateBox(map.boxPositions);
         //CameraController.Instance.SetPosition(map.mapSize);
@@ -64,40 +64,38 @@ public class MapManager : MonoBehaviour
         //    prefab = this.smallTreeBrick;
         //}
         //this.InstantiateBrick(map.bricks, prefab);
-        //if (map.containStar)
-        //{
-        //    this.starObject = Object.Instantiate<GameObject>(this.starPrefab);
-        //    this.starObject.transform.position = new Vector3((float)map.starPosition.x, (float)map.starPosition.y, 0f);
-        //    this.GetPoint(map.starPosition.x, map.starPosition.y).isStar = true;
-        //}
+        if (map.containStar)
+        {
+            this.starObject = Instantiate<GameObject>(this.starPrefab);
+            this.starObject.transform.position = new Vector3((float)map.starPosition.x, (float)map.starPosition.y, 0f);
+            this.GetPoint(map.starPosition.x, map.starPosition.y).isStar = true;
+        }
         //this.bgObject = Object.Instantiate<GameObject>(map.bg, Camera.main.transform);
         //this.bgObject.transform.localPosition = Vector3.forward * 10f;
         //GamePanelManager.Instance.ShowLevelInfo(map.name, map.levelNameEn);
     }
 
-    /*
     public void ClearLevel()
     {
         for (int i = 0; i < this.blockObjList.Count; i++)
         {
-            Object.Destroy(this.blockObjList[i]);
+            Destroy(this.blockObjList[i]);
         }
         for (int j = 0; j < this.boxObjList.Count; j++)
         {
-            Object.Destroy(this.boxObjList[j]);
+            Destroy(this.boxObjList[j]);
         }
         for (int k = 0; k < this.brickObjList.Count; k++)
         {
-            Object.Destroy(this.brickObjList[k]);
+            Destroy(this.brickObjList[k]);
         }
         this.blockObjList.Clear();
         this.boxObjList.Clear();
         this.brickObjList.Clear();
-        Object.Destroy(this.bgObject);
-        Object.Destroy(this.starObject);
+        Destroy(this.bgObject);
+        Destroy(this.starObject);
         BoxManager.Instance.ClearBox();
     }
-    */
 
     public void LoopMapInit()
     {
@@ -106,12 +104,12 @@ public class MapManager : MonoBehaviour
         BoxManager.Instance.ClearBoxPoint();
         BoxManager.Instance.RecoverBoxPosition(mapInfo.boxPositions);
         //this.StandKeyState(false);
-        //if (this.currentMap.containStar && this.starObject == null)
-        //{
-        //    this.starObject = Object.Instantiate<GameObject>(this.starPrefab);
-        //    this.starObject.transform.position = new Vector3((float)mapInfo.starPosition.x, (float)mapInfo.starPosition.y, 0f);
-        //    this.GetPoint(mapInfo.starPosition.x, mapInfo.starPosition.y).isStar = true;
-        //}
+        if (this.currentMap.containStar && this.starObject == null)
+        {
+            this.starObject = Instantiate<GameObject>(this.starPrefab);
+            this.starObject.transform.position = new Vector3((float)mapInfo.starPosition.x, (float)mapInfo.starPosition.y, 0f);
+            this.GetPoint(mapInfo.starPosition.x, mapInfo.starPosition.y).isStar = true;
+        }
     }
     private void InstantiateBlock(MapBlock block)
     {
@@ -155,14 +153,13 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    /*
     public void DestroyStar()
     {
         if (this.starObject == null)
         {
             return;
         }
-        Object.Destroy(this.starObject);
+        Destroy(this.starObject);
     }
 
     private void InstantiateBlock(MapBlock block, out Point p)
@@ -181,11 +178,11 @@ public class MapManager : MonoBehaviour
                 original = this.keyPrefab;
                 break;
         }
-        GameObject gameObject = Object.Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, (float)num), Quaternion.identity, base.transform);
-        if (block.type == BlockType.Key)
-        {
-            this.keyblock = gameObject.GetComponent<KeyBlockController>();
-        }
+        GameObject gameObject = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, (float)num), Quaternion.identity, base.transform);
+        //if (block.type == BlockType.Key)
+        //{
+        //    this.keyblock = gameObject.GetComponent<KeyBlockController>();
+        //}
         this.blockObjList.Add(gameObject);
         gameObject.GetComponent<BlockController>().SetTypeBlock(block.type);
         p = new Point(block.position.x, block.position.y);
@@ -206,7 +203,6 @@ public class MapManager : MonoBehaviour
             p.isKey = true;
         }
     }
-    */
 
     private void InstantiateBox(Vector2Int[] boxPositions)
     {
@@ -238,7 +234,6 @@ public class MapManager : MonoBehaviour
         p2.TelePoint = p1;
     }
 
-    // Token: 0x06000046 RID: 70 RVA: 0x00003367 File Offset: 0x00001567
     public Point GetPoint(int x, int y)
     {
         if (x < 0 || x > this.mapWidth - 1 || y < 0 || y > this.mapHeight - 1)
@@ -249,7 +244,6 @@ public class MapManager : MonoBehaviour
         return this.mapPoints[x, y];
     }
 
-    // Token: 0x06000047 RID: 71 RVA: 0x00003398 File Offset: 0x00001598
     public Point GetKeyPoint(MapInfo level)
     {
         for (int i = 0; i < level.blocks.Length; i++)
@@ -272,42 +266,32 @@ public class MapManager : MonoBehaviour
         this.keyblock.SetStandState(state);
     }
     */
-    // Token: 0x0400003E RID: 62
     private static MapManager instance;
 
-    // Token: 0x0400003F RID: 63
     [SerializeField]
     private MapInfo testMap;
 
-    // Token: 0x04000040 RID: 64
     [SerializeField]
     private GameObject blockPrefab;
 
-    // Token: 0x04000041 RID: 65
     [SerializeField]
     private GameObject endPrefab;
 
-    // Token: 0x04000042 RID: 66
     [SerializeField]
     private GameObject telePrefab;
 
-    // Token: 0x04000043 RID: 67
     [SerializeField]
     private GameObject keyPrefab;
 
-    // Token: 0x04000044 RID: 68
     [SerializeField]
     private GameObject boxPrefab;
 
-    // Token: 0x04000045 RID: 69
     [SerializeField]
     private GameObject smallTreeBrick;
 
-    // Token: 0x04000046 RID: 70
     [SerializeField]
     private GameObject bigTreeBrick;
 
-    // Token: 0x04000047 RID: 71
     [SerializeField]
     private GameObject starPrefab;
 

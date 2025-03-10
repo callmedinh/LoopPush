@@ -75,7 +75,7 @@ public class BoxManager : MonoBehaviour
                 return;
             }
         }
-        //GameManager.Instance.LevelComplete();
+        GameManager.Instance.LevelComplete();
     }
 
     /*

@@ -128,7 +128,6 @@ public class BoxController : MonoBehaviour
     [SerializeField]
     private MMFeedbacks teleFeedback;
 
-    // Token: 0x04000004 RID: 4
     [SerializeField]
     private MMFeedbacks settleFeedback;
     */

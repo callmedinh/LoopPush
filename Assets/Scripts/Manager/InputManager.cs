@@ -24,18 +24,18 @@ public class InputManager : MonoBehaviour
         {
             PlayerController.Instance.Move(Direction.Down);
         }
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    PlayerController.Instance.SkipTurn();
-        //}
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            PlayerController.Instance.SkipTurn();
+        }
         //if (Input.GetKeyDown(KeyCode.R))
         //{
         //    GameManager.Instance.RestartLevel();
         //}
-        //if (Input.GetKeyDown(KeyCode.Escape))
-        //{
-        //    GameManager.Instance.BackToMenu();
-        //}
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            GameManager.Instance.BackToMenu();
+        }
     }
     public static bool Enabled;
 }
