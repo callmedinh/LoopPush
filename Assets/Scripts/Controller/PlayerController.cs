@@ -263,7 +263,7 @@ public class PlayerController : MonoBehaviour
     private void StepCost()
     {
         this.stepLeft--;
-        //GamePanelManager.Instance.StepOneNode();
+        GamePanelManager.Instance.StepOneNode();
         if (this.stepLeft == 0)
         {
             base.StartCoroutine(this.WaitEndLoop());

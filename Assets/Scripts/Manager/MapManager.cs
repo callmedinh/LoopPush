@@ -48,8 +48,8 @@ public class MapManager : MonoBehaviour
         }
         PlayerController.Instance.Init(map.playerPosition, map.steps);
         this.InstantiateBox(map.boxPositions);
-        //CameraController.Instance.SetPosition(map.mapSize);
-        //GamePanelManager.Instance.InitTimelineNode(map.steps);
+        CameraController.Instance.SetPosition(map.mapSize);
+        GamePanelManager.Instance.InitTimelineNode(map.steps);
         //GameObject prefab = this.smallTreeBrick;
         //MapType mapType = map.mapType;
         //if (mapType != MapType.SmallTree)
