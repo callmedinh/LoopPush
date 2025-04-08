@@ -1,0 +1,12 @@
+{
+  "data": [
+    { "Chapter": 1, "LevelID": 0, "Passed": false, "CanStart": true },
+    { "Chapter": 1, "LevelID": 1, "Passed": false, "CanStart": false },
+    { "Chapter": 1, "LevelID": 2, "Passed": false, "CanStart": false },
+    { "Chapter": 1, "LevelID": 3, "Passed": false, "CanStart": false },
+    { "Chapter": 2, "LevelID": 0, "Passed": false, "CanStart": false },
+    { "Chapter": 2, "LevelID": 1, "Passed": false, "CanStart": false },
+    { "Chapter": 2, "LevelID": 2, "Passed": false, "CanStart": false },
+    { "Chapter": 2, "LevelID": 3, "Passed": false, "CanStart": false }
+  ]
+}

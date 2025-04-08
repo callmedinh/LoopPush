@@ -22,13 +22,8 @@ public class MapManager : MonoBehaviour
         instance = this;
     }
 
-    private void Start()
-    {
-    }
-
     public void InitLevel(MapInfo map)
     {
-        //this.keyblock = null;
         this.currentMap = map;
         this.mapWidth = map.mapSize.x;
         this.mapHeight = map.mapSize.y;
@@ -50,29 +45,15 @@ public class MapManager : MonoBehaviour
         this.InstantiateBox(map.boxPositions);
         CameraController.Instance.SetPosition(map.mapSize);
         GamePanelManager.Instance.InitTimelineNode(map.steps);
-        //GameObject prefab = this.smallTreeBrick;
-        //MapType mapType = map.mapType;
-        //if (mapType != MapType.SmallTree)
-        //{
-        //    if (mapType == MapType.BigTree)
-        //    {
-        //        prefab = this.bigTreeBrick;
-        //    }
-        //}
-        //else
-        //{
-        //    prefab = this.smallTreeBrick;
-        //}
-        //this.InstantiateBrick(map.bricks, prefab);
         if (map.containStar)
         {
             this.starObject = Instantiate<GameObject>(this.starPrefab);
             this.starObject.transform.position = new Vector3((float)map.starPosition.x, (float)map.starPosition.y, 0f);
             this.GetPoint(map.starPosition.x, map.starPosition.y).isStar = true;
         }
-        //this.bgObject = Object.Instantiate<GameObject>(map.bg, Camera.main.transform);
-        //this.bgObject.transform.localPosition = Vector3.forward * 10f;
-        //GamePanelManager.Instance.ShowLevelInfo(map.name, map.levelNameEn);
+        this.bgObject = Instantiate<GameObject>(map.bg, Camera.main.transform);
+        this.bgObject.transform.localPosition = Vector3.forward * 10f;
+        //GamePanelManager.Instance.ShowLevelInfo(map.name, map.levelName);
     }
 
     public void ClearLevel()
@@ -113,7 +94,6 @@ public class MapManager : MonoBehaviour
     }
     private void InstantiateBlock(MapBlock block)
     {
-        int num = this.mapWidth * block.position.y + block.position.x;
         GameObject original = this.blockPrefab;
         switch (block.type)
         {
@@ -127,7 +107,7 @@ public class MapManager : MonoBehaviour
                 original = this.keyPrefab;
                 break;
         }
-        GameObject gameObject = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, (float)num), Quaternion.identity, base.transform);
+        GameObject gameObject = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, -1f), Quaternion.identity, base.transform);
         //if (block.type == BlockType.Key)
         //{
         //    this.keyblock = gameObject.GetComponent<KeyBlockController>();
@@ -164,7 +144,6 @@ public class MapManager : MonoBehaviour
 
     private void InstantiateBlock(MapBlock block, out Point p)
     {
-        int num = this.mapWidth * block.position.y + block.position.x;
         GameObject original = this.blockPrefab;
         switch (block.type)
         {
@@ -178,7 +157,7 @@ public class MapManager : MonoBehaviour
                 original = this.keyPrefab;
                 break;
         }
-        GameObject gameObject = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, (float)num), Quaternion.identity, base.transform);
+        GameObject gameObject = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, -1f), Quaternion.identity, base.transform);
         //if (block.type == BlockType.Key)
         //{
         //    this.keyblock = gameObject.GetComponent<KeyBlockController>();
@@ -240,7 +219,6 @@ public class MapManager : MonoBehaviour
         {
             return null;
         }
-        Debug.Log("Get Point: " + this.mapPoints[x, y]);
         return this.mapPoints[x, y];
     }
 
@@ -285,9 +263,6 @@ public class MapManager : MonoBehaviour
 
     [SerializeField]
     private GameObject boxPrefab;
-
-    [SerializeField]
-    private GameObject smallTreeBrick;
 
     [SerializeField]
     private GameObject bigTreeBrick;

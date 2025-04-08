@@ -15,7 +15,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         GameManager.instance = this;
-        //DeData.Instance.Initialize();
     }
 
     public bool IsLevelComplete
@@ -47,50 +46,38 @@ public class GameManager : MonoBehaviour
         {
             '-'
         });
+        DeData.Instance.SetEnterLevel(int.Parse(array[0]), int.Parse(array[1]));
     }
 
-    /*
+
 
     public void RestartLevel()
     {
         InputManager.Enabled = false;
-        FadeTransitionManager.Instance.Fade(delegate
-        {
-            MapManager.Instance.ClearLevel();
-            PlayerController.Instance.ClearLastLoop();
-            InputManager.Enabled = true;
-            MapManager.Instance.InitLevel(this.enteredLevel);
-            this.keyPoint = MapManager.Instance.GetKeyPoint(this.enteredLevel);
-        });
+        MapManager.Instance.ClearLevel();
+        PlayerController.Instance.ClearLastLoop();
+        InputManager.Enabled = true;
+        MapManager.Instance.InitLevel(this.enteredLevel);
+        this.keyPoint = MapManager.Instance.GetKeyPoint(this.enteredLevel);
     }
+    //public void DetectStandKey()
+    //{
+    //    bool state = this.keyPoint == PlayerController.Instance.SelfPoint || this.keyPoint == PlayerController.Instance.ShadowPoint;
+    //    MapManager.Instance.StandKeyState(state);
+    //}
 
-    // Token: 0x0600002D RID: 45 RVA: 0x00002A74 File Offset: 0x00000C74
-    public void DetectStandKey()
-    {
-        bool state = this.keyPoint == PlayerController.Instance.SelfPoint || this.keyPoint == PlayerController.Instance.ShadowPoint;
-        MapManager.Instance.StandKeyState(state);
-    }
 
-    */
     public void LevelComplete()
     {
-        //if (this.levelContainKey)
-        //{
-        //    Debug.Log(this.keyPoint.ToString() + PlayerController.Instance.SelfPoint.ToString() + PlayerController.Instance.ShadowPoint.ToString());
-        //    Debug.Log(BoxManager.Instance.BoxReady());
-        //    if (!BoxManager.Instance.BoxReady() || (this.keyPoint != PlayerController.Instance.SelfPoint && this.keyPoint != PlayerController.Instance.ShadowPoint))
-        //    {
-        //        return;
-        //    }
-        //}
         this.isLevelComplete = true;
-        Debug.Log("????");
         InputManager.Enabled = false;
         base.StartCoroutine(this.WaitBackToLevel());
+        DeData.Instance.SaveLevel();
     }
     private IEnumerator WaitBackToLevel()
     {
         yield return new WaitForSeconds(0.9f);
+        GamePanelManager.Instance.Hide();
         LevelPanelManager.Instance.Show();
         MapManager.Instance.ClearLevel();
         yield break;

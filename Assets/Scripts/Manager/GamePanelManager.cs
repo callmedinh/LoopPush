@@ -27,6 +27,7 @@ public class GamePanelManager : MonoBehaviour
             return;
         }
         _instance = this;
+        Hide();
     }
     public void Show()
     {
@@ -46,8 +47,8 @@ public class GamePanelManager : MonoBehaviour
             NodeController component = Object.Instantiate<GameObject>(this.nodePrefab, this.nodeGridTransform).GetComponent<NodeController>();
             this.nodeObjList.Add(component);
         }
-        float x = (float)(-69 * count + 32);
-        this.timelineTransform.localPosition = new Vector3(x, 466f, 0f);
+        float x = (float)(-36 * count);
+        this.timelineTransform.localPosition = new Vector3(x, 180f, 0f);
     }
     public void ClearTimelineNode()
     {
@@ -62,9 +63,12 @@ public class GamePanelManager : MonoBehaviour
         this.nodeObjList[this.currentNode].DoFill();
         this.currentNode++;
     }
-    public void ShowLevelInfo(string id, string name)
+    public void ClearNodeStep()
     {
-        this.levelIDText.text = id;
-        this.levelNameText.text = name;
+        for (int i = 0; i < this.nodeObjList.Count; i++)
+        {
+            this.nodeObjList[i].ClearFill();
+        }
+        this.currentNode = 0;
     }
 }

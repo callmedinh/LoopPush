@@ -20,6 +20,10 @@ public class NodeController : MonoBehaviour
         this.circleImg.fillAmount = 1f;
         yield break;
     }
+    public void ClearFill()
+    {
+        this.brigeImg.fillAmount = (this.circleImg.fillAmount = 0f);
+    }
     [SerializeField]
     private Image brigeImg;
 

@@ -24,7 +24,7 @@ public class BoxController : MonoBehaviour
     public void Init(Vector2Int position)
     {
         this.point = MapManager.Instance.GetPoint(position.x, position.y);
-        base.transform.position = new Vector3((float)position.x, (float)position.y, 0f);
+        base.transform.position = new Vector3((float)position.x, (float)position.y, -2f);
         this.point.isBox = true;
         this.isSettled = false;
     }
@@ -62,11 +62,10 @@ public class BoxController : MonoBehaviour
         if (flag)
         {
             base.transform.DOMove(point.TelePoint.Position, 0.1f, false);
-            //base.StartCoroutine(this.PlayTeleEffect(point.Position));
         }
         else
         {
-            base.transform.DOMove(point.Position, 0.1f, false);
+            base.transform.DOMove(point.Position + new Vector3(0f, 0f, -1f), 0.1f, false);
         }
         this.point = point;
         this.point.isBox = true;

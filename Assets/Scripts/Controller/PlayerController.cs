@@ -37,8 +37,8 @@ public class PlayerController : MonoBehaviour
     public void Init(Vector2Int position, int steps)
     {
         this.shadowPoint = (this.point = MapManager.Instance.GetPoint(position.x, position.y));
-        base.transform.position = this.point.Position;
-        this.shadow.position = this.point.Position;
+        base.transform.position = this.point.Position + new Vector3(0f,0f,-1f);
+        this.shadow.position = this.point.Position + new Vector3(0f, 0f, -1f);
         this.stepTotal = steps;
         this.stepLeft = steps;
         this.currentLoopActions = new Direction[steps];
@@ -111,19 +111,13 @@ public class PlayerController : MonoBehaviour
         if (flag)
         {
             base.transform.DOMove(point.TelePoint.Position, 0.1f, false);
-            //base.StartCoroutine(this.PlayTeleEffect(point.Position));
         }
         else
         {
             base.transform.DOMove(point.Position, 0.1f, false);
         }
-        base.transform.DOMove(_point.Position, 0.1f, false);
+        base.transform.DOMove(_point.Position + new Vector3(0,0,-1f), 0.1f, false);
         
-        //MMFeedbacks mmfeedbacks = this.moveFeedback;
-        //if (mmfeedbacks != null)
-        //{
-        //    mmfeedbacks.PlayFeedbacks();
-        //}
         this.currentLoopActions[this.stepTotal - this.stepLeft] = dir;
         if (this.lastLoopActions != null)
         {
@@ -132,20 +126,6 @@ public class PlayerController : MonoBehaviour
         this.StepCost();
         //GameManager.Instance.DetectStandKey();
     }
-
-
-    //private IEnumerator PlayTeleEffect(Vector3 pos)
-    //{
-    //    yield return new WaitForSeconds(0.1f);
-    //    MMFeedbacks mmfeedbacks = this.teleFeedback;
-    //    if (mmfeedbacks != null)
-    //    {
-    //        mmfeedbacks.PlayFeedbacks();
-    //    }
-    //    base.transform.position = pos;
-    //    yield break;
-    //}
-
 
     private IEnumerator WaitShadowMove(Direction dir)
     {
@@ -206,29 +186,16 @@ public class PlayerController : MonoBehaviour
             }
             if (flag)
             {
-                this.shadow.DOMove(_point.TelePoint.Position, 0.1f, false);
-                //base.StartCoroutine(this.PlayShadowTeleEffect(point.Position));
+                this.shadow.DOMove(_point.TelePoint.Position + new Vector3(0f, 0f, -1f), 0.1f, false);
             }
             else
             {
-                this.shadow.DOMove(_point.Position, 0.1f, false);
+                this.shadow.DOMove(_point.Position + new Vector3(0f, 0f, -1f), 0.1f, false);
             }
-            //MMFeedbacks mmfeedbacks = this.shadowMoveFeedback;
-            //if (mmfeedbacks != null)
-            //{
-            //    mmfeedbacks.PlayFeedbacks();
-            //}
             this.shadowPoint = _point;
             //GameManager.Instance.DetectStandKey();
             return;
         }
-        //Object.FindObjectOfType<RippleEffect>().Emit(Camera.main.WorldToViewportPoint(this.shadow.position));
-        //MMFeedbacks mmfeedbacks2 = this.skipFeedback;
-        //if (mmfeedbacks2 == null)
-        //{
-        //    return;
-        //}
-        //mmfeedbacks2.PlayFeedbacks();
     }
 
 
@@ -251,12 +218,6 @@ public class PlayerController : MonoBehaviour
             this.ShadowMove(this.lastLoopActions[this.stepTotal - this.stepLeft]);
         }
         this.currentLoopActions[this.stepTotal - this.stepLeft] = Direction.None;
-        //Object.FindObjectOfType<RippleEffect>().Emit(Camera.main.WorldToViewportPoint(base.transform.position));
-        //MMFeedbacks mmfeedbacks = this.skipFeedback;
-        //if (mmfeedbacks != null)
-        //{
-        //    mmfeedbacks.PlayFeedbacks();
-        //}
         this.StepCost();
     }
 
@@ -286,7 +247,7 @@ public class PlayerController : MonoBehaviour
         Debug.Log(lastLoopActions);
         MapManager.Instance.LoopMapInit();
         //CameraController.Instance.PlayReloadFeedback();
-        //GamePanelManager.Instance.ClearNodeStep();
+        GamePanelManager.Instance.ClearNodeStep();
     }
 
     private static PlayerController instance;

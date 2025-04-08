@@ -28,10 +28,10 @@ public class InputManager : MonoBehaviour
         {
             PlayerController.Instance.SkipTurn();
         }
-        //if (Input.GetKeyDown(KeyCode.R))
-        //{
-        //    GameManager.Instance.RestartLevel();
-        //}
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            GameManager.Instance.RestartLevel();
+        }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             GameManager.Instance.BackToMenu();
