@@ -2,33 +2,48 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class NodeController : MonoBehaviour
+namespace Controller
 {
-    public void DoFill()
+    public class NodeController
     {
-        StartCoroutine(FillAnimation());
-    }
-    private IEnumerator FillAnimation()
-    {
-        float timer = 0f;
-        while (timer < this.animTime)
+        private Image bridgeImg;
+        private Image circleImg;
+        private float animTime = 0.1f;
+        private float timer = 0f;
+        private bool isFilling = false;
+
+        public NodeController(Image bridge, Image circle)
         {
-            timer += Time.deltaTime;
-            this.brigeImg.fillAmount = timer / this.animTime;
-            yield return null;
+            bridgeImg = bridge;
+            circleImg = circle;
         }
-        this.circleImg.fillAmount = 1f;
-        yield break;
-    }
-    public void ClearFill()
-    {
-        this.brigeImg.fillAmount = (this.circleImg.fillAmount = 0f);
-    }
-    [SerializeField]
-    private Image brigeImg;
 
-    [SerializeField]
-    private Image circleImg;
+        public void StartFill()
+        {
+            isFilling = true;
+            timer = 0;
+        }
 
-    private readonly float animTime = 0.1f;
+        public void Update()
+        {
+            if (!isFilling) return;
+            
+            timer += Time.deltaTime;
+            float t = Mathf.Clamp01(timer / animTime);
+            bridgeImg.fillAmount = t;
+
+            if (t >= 1f)
+            {
+                circleImg.fillAmount = 1f;
+                isFilling = false;
+            }
+        }
+       
+        public void ClearFill()
+        {
+            bridgeImg.fillAmount = (this.circleImg.fillAmount = 0f);
+            isFilling = false;
+        }
+
+    }
 }

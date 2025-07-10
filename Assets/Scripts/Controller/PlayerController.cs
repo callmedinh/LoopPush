@@ -1,299 +1,249 @@
-using System;
 using System.Collections;
-using UnityEngine;
 using DG.Tweening;
+using Events;
+using Manager;
+using UnityEngine;
+using Utilities;
 
-public class PlayerController : MonoBehaviour
+namespace Controller
 {
-    public static PlayerController Instance
+    public class PlayerController : Singleton<PlayerController>
     {
-        get
-        {
-            return PlayerController.instance;
-        }
-    }
+        private static readonly int Slide = Animator.StringToHash("Slide");
 
-    private void Awake()
-    {
-        PlayerController.instance = this;
-    }
-
-    public Point SelfPoint
-    {
-        get
+        public Point SelfPoint
         {
-            return this.point;
+            get
+            {
+                return this.point;
+            }
         }
-    }
 
-    public Point ShadowPoint
-    {
-        get
+        public Point ShadowPoint
         {
-            return this.shadowPoint;
+            get
+            {
+                return this.shadowPoint;
+            }
         }
-    }
 
-    public void Init(Vector2Int position, int steps)
-    {
-        this.shadowPoint = (this.point = MapManager.Instance.GetPoint(position.x, position.y));
-        base.transform.position = this.point.Position + new Vector3(0f,0f,-1f);
-        this.shadow.position = this.point.Position + new Vector3(0f, 0f, -1f);
-        this.stepTotal = steps;
-        this.stepLeft = steps;
-        this.currentLoopActions = new Direction[steps];
-        this.shadow.gameObject.SetActive(this.lastLoopActions != null);
-    }
+        protected override void Awake()
+        {
+            base.Awake();
+            InputEvent.OnDownDirectionPressed += (() => Move(Direction.Down));
+            InputEvent.OnUpDirectionPressed += (() => Move(Direction.Up));
+            InputEvent.OnLeftDirectionPressed += (() => Move(Direction.Left));
+            InputEvent.OnRightDirectionPressed += (() => Move(Direction.Right));
+        }
 
-    public void ClearLastLoop()
-    {
-        this.lastLoopActions = null;
-    }
+        public void Init(Vector2Int position, int steps)
+        {
+            this.shadowPoint = (this.point = MapManager.Instance.GetPoint(position.x, position.y));
+            transform.position = this.point.Position + new Vector3(0f,0f,-1f);
+            this.shadow.position = this.point.Position + new Vector3(0f, 0f, -1f);
+            this.stepTotal = steps;
+            this.stepLeft = steps;
+            this.currentLoopActions = new Direction[steps];
+            this.shadow.gameObject.SetActive(this.lastLoopActions != null);
+        }
 
-    public void Move(Direction dir)
-    {
-        if (this.stepLeft < 1)
+        public void ClearLastLoop()
         {
-            Debug.Log(stepLeft);
-            return;
+            this.lastLoopActions = null;
         }
-        Point _point = null;
-        switch (dir)
+
+        public void Move(Direction dir)
         {
-            case Direction.Left:
-                _point = MapManager.Instance.GetPoint(this.point.X - 1, this.point.Y);
-                this.rendererTransform.localScale = new Vector3(-1f, 1f, 1f);
-                break;
-            case Direction.Right:
-                _point = MapManager.Instance.GetPoint(this.point.X + 1, this.point.Y);
-                this.rendererTransform.localScale = Vector3.one;
-                break;
-            case Direction.Up:
-                _point = MapManager.Instance.GetPoint(this.point.X, this.point.Y + 1);
-                break;
-            case Direction.Down:
-                _point = MapManager.Instance.GetPoint(this.point.X, this.point.Y - 1);
-                break;
-        }
-        if (_point == null)
-        {
-            Debug.Log($"Trying to move to: ({this.point.X}, {this.point.Y}) - Got point: {_point}");
-            return;
-        }
-        
-        if (_point.isBox)
-        {
-            if (!BoxManager.Instance.GetBox(_point).CanMove(dir))
+            if (this.stepLeft < 1)
             {
                 return;
             }
-            BoxManager.Instance.GetBox(_point).Move(dir);
-            //if (dir == Direction.Left || dir == Direction.Right)
-            //{
-            //    this.animator.SetTrigger("Push");
-            //}
-        }
-        bool flag = false;
-        if (_point.isTele && !_point.TelePoint.isBox)
-        {
-            _point = _point.TelePoint;
-            flag = true;
-        }
-        //if (_point.isKey)
-        //{
-        //    GameManager.Instance.LevelComplete();
-        //}
-        //if (_point.isStar)
-        //{
-        //    MapManager.Instance.DestroyStar();
-        //}
-        this.point = _point;
-        if (flag)
-        {
-            base.transform.DOMove(point.TelePoint.Position, 0.1f, false);
-        }
-        else
-        {
-            base.transform.DOMove(point.Position, 0.1f, false);
-        }
-        base.transform.DOMove(_point.Position + new Vector3(0,0,-1f), 0.1f, false);
-        
-        this.currentLoopActions[this.stepTotal - this.stepLeft] = dir;
-        if (this.lastLoopActions != null)
-        {
-            base.StartCoroutine(this.WaitShadowMove(this.lastLoopActions[this.stepTotal - this.stepLeft]));
-        }
-        this.StepCost();
-        //GameManager.Instance.DetectStandKey();
-    }
-
-    private IEnumerator WaitShadowMove(Direction dir)
-    {
-        yield return new WaitForSeconds(0.1f);
-        this.ShadowMove(dir);
-        yield break;
-    }
-
-    private void ShadowMove(Direction dir)
-    {
-        Point _point = null;
-        switch (dir)
-        {
-            case Direction.Left:
-                _point = MapManager.Instance.GetPoint(this.shadowPoint.X - 1, this.shadowPoint.Y);
-                this.shadowRenderTransform.localScale = new Vector3(-1f, 1f, 1f);
-                break;
-            case Direction.Right:
-                _point = MapManager.Instance.GetPoint(this.shadowPoint.X + 1, this.shadowPoint.Y);
-                this.shadowRenderTransform.localScale = Vector3.one;
-                break;
-            case Direction.Up:
-                _point = MapManager.Instance.GetPoint(this.shadowPoint.X, this.shadowPoint.Y + 1);
-                break;
-            case Direction.Down:
-                _point = MapManager.Instance.GetPoint(this.shadowPoint.X, this.shadowPoint.Y - 1);
-                break;
-        }
-        if (_point != null)
-        {
-            if (_point.isBox)
+            Point _point = null;
+            switch (dir)
             {
-                if (!BoxManager.Instance.GetBox(_point).CanMove(dir))
+                case Direction.Left:
+                    _point = MapManager.Instance.GetPoint(this.point.X - 1, this.point.Y);
+                    this.rendererTransform.localScale = new Vector3(-1f, 1f, 1f);
+                    break;
+                case Direction.Right:
+                    _point = MapManager.Instance.GetPoint(this.point.X + 1, this.point.Y);
+                    this.rendererTransform.localScale = Vector3.one;
+                    break;
+                case Direction.Up:
+                    _point = MapManager.Instance.GetPoint(this.point.X, this.point.Y + 1);
+                    break;
+                case Direction.Down:
+                    _point = MapManager.Instance.GetPoint(this.point.X, this.point.Y - 1);
+                    break;
+            }
+
+            if (_point != null)
+            {
+                if (_point.IsBox)
                 {
-                    return;
+                    if (!BoxManager.Instance.GetBox(_point).CanMove(dir))
+                    {
+                        return;
+                    }
+                    BoxManager.Instance.GetBox(_point).Move(dir);
+                    if (dir == Direction.Left || dir == Direction.Right)
+                    {
+                        animator.SetTrigger(Slide);
+                    }
                 }
-                BoxManager.Instance.GetBox(_point).Move(dir);
-                //if (dir == Direction.Left || dir == Direction.Right)
-                //{
-                //    this.animator.SetTrigger("Push");
-                //}
+                bool flag = false;
+                if (_point.IsTele && !_point.TelePoint.IsBox)
+                {
+                    _point = _point.TelePoint;
+                    flag = true;
+                }
+                this.point = _point;
+                if (flag)
+                {
+                    transform.DOMove(point.TelePoint.Position, 0.1f);
+                }
+                else
+                {
+                    transform.DOMove(point.Position, 0.1f);
+                }
+                transform.DOMove(_point.Position + new Vector3(0,0,-1f), 0.1f);
+        
+                currentLoopActions[this.stepTotal - this.stepLeft] = dir;
+                if (this.lastLoopActions != null)
+                {
+                    StartCoroutine(this.WaitShadowMove(this.lastLoopActions[this.stepTotal - this.stepLeft]));
+                }
+                StepCost();
             }
-            if (_point.isStar)
+        }
+
+        private IEnumerator WaitShadowMove(Direction dir)
+        {
+            yield return new WaitForSeconds(0.1f);
+            ShadowMove(dir);
+        }
+
+        private void ShadowMove(Direction dir)
+        {
+            Point _point = null;
+            switch (dir)
             {
-                MapManager.Instance.DestroyStar();
+                case Direction.Left:
+                    _point = MapManager.Instance.GetPoint(this.shadowPoint.X - 1, this.shadowPoint.Y);
+                    this.shadowRenderTransform.localScale = new Vector3(-1f, 1f, 1f);
+                    break;
+                case Direction.Right:
+                    _point = MapManager.Instance.GetPoint(this.shadowPoint.X + 1, this.shadowPoint.Y);
+                    this.shadowRenderTransform.localScale = Vector3.one;
+                    break;
+                case Direction.Up:
+                    _point = MapManager.Instance.GetPoint(this.shadowPoint.X, this.shadowPoint.Y + 1);
+                    break;
+                case Direction.Down:
+                    _point = MapManager.Instance.GetPoint(this.shadowPoint.X, this.shadowPoint.Y - 1);
+                    break;
             }
-            bool flag = false;
-            if (_point.isTele && !_point.TelePoint.isBox)
+            if (_point != null)
             {
-                _point = _point.TelePoint;
-                flag = true;
-            }
-            Debug.Log(point);
-            if (_point.isKey)
-            {
+                if (_point.IsBox)
+                {
+                    if (!BoxManager.Instance.GetBox(_point).CanMove(dir))
+                    {
+                        return;
+                    }
+                    BoxManager.Instance.GetBox(_point).Move(dir);
+                    if (dir == Direction.Left || dir == Direction.Right)
+                    {
+                        animator.SetTrigger(Slide);
+                    }
+                }
+                if (_point.IsStar)
+                {
+                    MapManager.Instance.DestroyStar();
+                }
+                bool flag = false;
+                if (_point.IsTele && !_point.TelePoint.IsBox)
+                {
+                    _point = _point.TelePoint;
+                    flag = true;
+                }
+                if (_point.IsKey)
+                {
+                    this.shadowPoint = _point;
+                }
+                if (flag)
+                {
+                    this.shadow.DOMove(_point.TelePoint.Position + new Vector3(0f, 0f, -1f), 0.1f);
+                }
+                else
+                {
+                    this.shadow.DOMove(_point.Position + new Vector3(0f, 0f, -1f), 0.1f);
+                }
                 this.shadowPoint = _point;
-                //GameManager.Instance.LevelComplete();
             }
-            if (flag)
+        }
+
+        public void SkipTurn()
+        {
+            if (this.lastLoopActions != null)
             {
-                this.shadow.DOMove(_point.TelePoint.Position + new Vector3(0f, 0f, -1f), 0.1f, false);
+                this.ShadowMove(this.lastLoopActions[this.stepTotal - this.stepLeft]);
             }
-            else
+            this.currentLoopActions[this.stepTotal - this.stepLeft] = Direction.None;
+            StepCost();
+        }
+
+        private void StepCost()
+        {
+            stepLeft--;
+            GameplayEvent.OnPlayerStepTaken?.Invoke();
+            if (this.stepLeft == 0)
             {
-                this.shadow.DOMove(_point.Position + new Vector3(0f, 0f, -1f), 0.1f, false);
+                StartCoroutine(this.WaitEndLoop());
             }
-            this.shadowPoint = _point;
-            //GameManager.Instance.DetectStandKey();
-            return;
         }
-    }
 
-
-    //private IEnumerator PlayShadowTeleEffect(Vector3 pos)
-    //{
-    //    yield return new WaitForSeconds(0.1f);
-    //    MMFeedbacks mmfeedbacks = this.shadowTeleFeedback;
-    //    if (mmfeedbacks != null)
-    //    {
-    //        mmfeedbacks.PlayFeedbacks();
-    //    }
-    //    this.shadow.position = pos;
-    //    yield break;
-    //}
-
-    public void SkipTurn()
-    {
-        if (this.lastLoopActions != null)
+        private IEnumerator WaitEndLoop()
         {
-            this.ShadowMove(this.lastLoopActions[this.stepTotal - this.stepLeft]);
+            yield return new WaitForSeconds(0.5f);
+            if (!GameManager.Instance.IsLevelComplete)
+            {
+                this.OverLoop();
+            }
         }
-        this.currentLoopActions[this.stepTotal - this.stepLeft] = Direction.None;
-        this.StepCost();
-    }
 
-    private void StepCost()
-    {
-        this.stepLeft--;
-        GamePanelManager.Instance.StepOneNode();
-        if (this.stepLeft == 0)
+        private void OverLoop()
         {
-            base.StartCoroutine(this.WaitEndLoop());
+            this.lastLoopActions = this.currentLoopActions;
+            MapManager.Instance.LoopMapInit();
+            GameplayEvent.OnLoopEnded?.Invoke();
         }
+
+        [SerializeField]
+        private Transform shadow;
+
+        [SerializeField]
+        private Transform rendererTransform;
+
+        [SerializeField]
+        private Transform shadowRenderTransform;
+
+        [SerializeField]
+        private Animator animator;
+
+        [SerializeField]
+        private Animator shadowAnimator;
+
+        private Point point;
+
+        private Point shadowPoint;
+
+        private int stepTotal;
+
+        private int stepLeft;
+
+        private Direction[] currentLoopActions;
+
+        private Direction[] lastLoopActions;
     }
-
-    private IEnumerator WaitEndLoop()
-    {
-        yield return new WaitForSeconds(0.5f);
-        if (!GameManager.Instance.IsLevelComplete)
-        {
-            this.OverLoop();
-        }
-        yield break;
-    }
-
-    private void OverLoop()
-    {
-        this.lastLoopActions = this.currentLoopActions;
-        Debug.Log(lastLoopActions);
-        MapManager.Instance.LoopMapInit();
-        //CameraController.Instance.PlayReloadFeedback();
-        GamePanelManager.Instance.ClearNodeStep();
-    }
-
-    private static PlayerController instance;
-
-    [SerializeField]
-    private Transform shadow;
-
-    [SerializeField]
-    private Transform rendererTransform;
-
-    [SerializeField]
-    private Transform shadowRenderTransform;
-
-    [SerializeField]
-    private Animator animator;
-
-    [SerializeField]
-    private Animator shadowAnimator;
-
-    /*
-    [SerializeField]
-    private MMFeedbacks moveFeedback;
-
-    [SerializeField]
-    private MMFeedbacks teleFeedback;
-
-    [SerializeField]
-    private MMFeedbacks shadowTeleFeedback;
-
-    [SerializeField]
-    private MMFeedbacks shadowMoveFeedback;
-
-    [SerializeField]
-    private MMFeedbacks skipFeedback;
-
-    */
-
-    private Point point;
-
-    private Point shadowPoint;
-
-    private int stepTotal;
-
-    private int stepLeft;
-
-    private Direction[] currentLoopActions;
-
-    private Direction[] lastLoopActions;
 }

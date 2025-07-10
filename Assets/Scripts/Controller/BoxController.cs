@@ -24,8 +24,8 @@ public class BoxController : MonoBehaviour
     public void Init(Vector2Int position)
     {
         this.point = MapManager.Instance.GetPoint(position.x, position.y);
-        base.transform.position = new Vector3((float)position.x, (float)position.y, -2f);
-        this.point.isBox = true;
+        transform.position = new Vector3((float)position.x, (float)position.y, -2f);
+        this.point.IsBox = true;
         this.isSettled = false;
     }
 
@@ -53,51 +53,30 @@ public class BoxController : MonoBehaviour
             return;
         }
         bool flag = false;
-        if (point.isTele && !point.TelePoint.isBox)
+        if (point.IsTele && !point.TelePoint.IsBox)
         {
             point = point.TelePoint;
             flag = true;
         }
-        this.point.isBox = false;
+        this.point.IsBox = false;
         if (flag)
         {
-            base.transform.DOMove(point.TelePoint.Position, 0.1f, false);
+            transform.DOMove(point.TelePoint.Position, 0.1f, false);
         }
         else
         {
-            base.transform.DOMove(point.Position + new Vector3(0f, 0f, -1f), 0.1f, false);
+            transform.DOMove(point.Position + new Vector3(0f, 0f, -1f), 0.1f, false);
         }
         this.point = point;
-        this.point.isBox = true;
-        if (!point.isDst)
+        this.point.IsBox = true;
+        if (!point.IsDst)
         {
             this.isSettled = false;
             return;
         }
         this.isSettled = true;
         BoxManager.Instance.DetectBoxState();
-        //MMFeedbacks mmfeedbacks = this.settleFeedback;
-        //if (mmfeedbacks == null)
-        //{
-        //    return;
-        //}
-        //mmfeedbacks.PlayFeedbacks();
     }
-
-    /*
-    private IEnumerator PlayTeleEffect(Vector3 pos)
-    {
-        yield return new WaitForSeconds(0.1f);
-        MMFeedbacks mmfeedbacks = this.teleFeedback;
-        if (mmfeedbacks != null)
-        {
-            mmfeedbacks.PlayFeedbacks();
-        }
-        base.transform.position = pos;
-        yield break;
-    }
-
-        */
     public bool CanMove(Direction dir)
     {
         Point point = null;
@@ -120,14 +99,5 @@ public class BoxController : MonoBehaviour
     }
 
     private Point point;
-
     private bool isSettled;
-
-    /*
-    [SerializeField]
-    private MMFeedbacks teleFeedback;
-
-    [SerializeField]
-    private MMFeedbacks settleFeedback;
-    */
 }

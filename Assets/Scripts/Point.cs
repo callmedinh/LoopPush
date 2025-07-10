@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 
 public class Point
 {
@@ -13,15 +12,15 @@ public class Point
         this.Y = y;
     }
 
-    public bool isBox { get; set; }
+    public bool IsBox { get; set; }
 
-    public bool isTele { get; set; }
+    public bool IsTele { get; set; }
 
-    public bool isDst { get; set; }
+    public bool IsDst { get; set; }
 
-    public bool isKey { get; set; }
+    public bool IsKey { get; set; }
 
-    public bool isStar { get; set; }
+    public bool IsStar { get; set; }
 
     public Point TelePoint { get; set; }
 

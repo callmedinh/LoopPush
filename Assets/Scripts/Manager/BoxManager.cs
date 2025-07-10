@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Manager;
 using UnityEngine;
 
 public class BoxManager : MonoBehaviour
@@ -47,7 +48,7 @@ public class BoxManager : MonoBehaviour
     {
         for (int i = 0; i < this.boxList.Count; i++)
         {
-            this.boxList[i].P.isBox = false;
+            this.boxList[i].P.IsBox = false;
         }
     }
     public void ClearBox()
@@ -77,23 +78,6 @@ public class BoxManager : MonoBehaviour
         }
         GameManager.Instance.LevelComplete();
     }
-
-    /*
-    public bool BoxReady()
-    {
-        bool result = true;
-        Debug.Log(this.boxList.Count);
-        for (int i = 0; i < this.boxList.Count; i++)
-        {
-            if (!this.boxList[i].IsSettled)
-            {
-                result = false;
-            }
-        }
-        return result;
-    }
-
-    */
     private static BoxManager instance;
     private List<BoxController> boxList = new List<BoxController>();
 }

@@ -1,33 +1,24 @@
 using System;
 using System.Collections.Generic;
+using Controller;
+using UI;
 using UnityEngine;
+using Utilities;
 
-public class MapManager : MonoBehaviour
+public class MapManager : Singleton<MapManager>
 {
-    public static MapManager Instance
+    [SerializeField] private GameplayView gameplayView;
+    protected override void Awake()
     {
-        get
-        {
-            return MapManager.instance;
-        }
-    }
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        instance = this;
+        base.Awake();
     }
 
     public void InitLevel(MapInfo map)
     {
-        this.currentMap = map;
-        this.mapWidth = map.mapSize.x;
-        this.mapHeight = map.mapSize.y;
-        this.mapPoints = new Point[this.mapWidth, this.mapHeight];
+        CurrentMap = map;
+        mapWidth = map.mapSize.x;
+        mapHeight = map.mapSize.y;
+        mapPoints = new Point[this.mapWidth, this.mapHeight];
 
         for (int i = 0; i < map.blocks.Length; i++)
         {
@@ -44,16 +35,18 @@ public class MapManager : MonoBehaviour
         PlayerController.Instance.Init(map.playerPosition, map.steps);
         this.InstantiateBox(map.boxPositions);
         CameraController.Instance.SetPosition(map.mapSize);
-        GamePanelManager.Instance.InitTimelineNode(map.steps);
         if (map.containStar)
         {
             this.starObject = Instantiate<GameObject>(this.starPrefab);
             this.starObject.transform.position = new Vector3((float)map.starPosition.x, (float)map.starPosition.y, 0f);
-            this.GetPoint(map.starPosition.x, map.starPosition.y).isStar = true;
+            this.GetPoint(map.starPosition.x, map.starPosition.y).IsStar = true;
         }
-        this.bgObject = Instantiate<GameObject>(map.bg, Camera.main.transform);
-        this.bgObject.transform.localPosition = Vector3.forward * 10f;
-        //GamePanelManager.Instance.ShowLevelInfo(map.name, map.levelName);
+
+        if (map.bg != null)
+        {
+            bgObject = Instantiate<GameObject>(map.bg, Camera.main.transform);
+            bgObject.transform.localPosition = Vector3.forward * 10f;   
+        }
     }
 
     public void ClearLevel()
@@ -80,16 +73,15 @@ public class MapManager : MonoBehaviour
 
     public void LoopMapInit()
     {
-        MapInfo mapInfo = this.currentMap;
+        MapInfo mapInfo = CurrentMap;
         PlayerController.Instance.Init(mapInfo.playerPosition, mapInfo.steps);
         BoxManager.Instance.ClearBoxPoint();
         BoxManager.Instance.RecoverBoxPosition(mapInfo.boxPositions);
-        //this.StandKeyState(false);
-        if (this.currentMap.containStar && this.starObject == null)
+        if (CurrentMap.containStar && this.starObject == null)
         {
             this.starObject = Instantiate<GameObject>(this.starPrefab);
             this.starObject.transform.position = new Vector3((float)mapInfo.starPosition.x, (float)mapInfo.starPosition.y, 0f);
-            this.GetPoint(mapInfo.starPosition.x, mapInfo.starPosition.y).isStar = true;
+            this.GetPoint(mapInfo.starPosition.x, mapInfo.starPosition.y).IsStar = true;
         }
     }
     private void InstantiateBlock(MapBlock block)
@@ -107,29 +99,29 @@ public class MapManager : MonoBehaviour
                 original = this.keyPrefab;
                 break;
         }
-        GameObject gameObject = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, -1f), Quaternion.identity, base.transform);
+        GameObject obj = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, -1f), Quaternion.identity, base.transform);
         //if (block.type == BlockType.Key)
         //{
         //    this.keyblock = gameObject.GetComponent<KeyBlockController>();
         //}
-        this.blockObjList.Add(gameObject);
-        gameObject.GetComponent<BlockController>().SetTypeBlock(block.type);
+        this.blockObjList.Add(obj);
+        obj.GetComponent<BlockController>().SetTypeBlock(block.type);
         Point point = new(block.position.x, block.position.y);
         this.mapPoints[block.position.x, block.position.y] = point;
-        point.Position = gameObject.transform.position;
+        point.Position = obj.transform.position;
         if (block.type == BlockType.Teleport)
         {
-            point.isTele = true;
+            point.IsTele = true;
             return;
         }
         if (block.type == BlockType.End)
         {
-            point.isDst = true;
+            point.IsDst = true;
             return;
         }
         if (block.type == BlockType.Key)
         {
-            point.isKey = true;
+            point.IsKey = true;
         }
     }
 
@@ -169,17 +161,17 @@ public class MapManager : MonoBehaviour
         p.Position = gameObject.transform.position;
         if (block.type == BlockType.Teleport)
         {
-            p.isTele = true;
+            p.IsTele = true;
             return;
         }
         if (block.type == BlockType.End)
         {
-            p.isDst = true;
+            p.IsDst = true;
             return;
         }
         if (block.type == BlockType.Key)
         {
-            p.isKey = true;
+            p.IsKey = true;
         }
     }
 
@@ -194,18 +186,6 @@ public class MapManager : MonoBehaviour
             BoxManager.Instance.AddBoxToList(component);
         }
     }
-
-    /*
-    private void InstantiateBrick(MapBlock[] blocks, GameObject prefab)
-    {
-        for (int i = 0; i < blocks.Length; i++)
-        {
-            int num = this.mapWidth * blocks[i].position.y + blocks[i].position.x;
-            GameObject item = Object.Instantiate<GameObject>(prefab, new Vector3((float)blocks[i].position.x, (float)blocks[i].position.y, (float)num), Quaternion.identity, base.transform);
-            this.brickObjList.Add(item);
-        }
-    }
-    */
 
     private void BindTeleportInfo(Point p1, Point p2)
     {
@@ -233,19 +213,6 @@ public class MapManager : MonoBehaviour
         }
         return null;
     }
-
-    /*
-    public void StandKeyState(bool state)
-    {
-        if (this.keyblock == null)
-        {
-            return;
-        }
-        this.keyblock.SetStandState(state);
-    }
-    */
-    private static MapManager instance;
-
     [SerializeField]
     private MapInfo testMap;
 
@@ -279,7 +246,7 @@ public class MapManager : MonoBehaviour
 
     private int mapHeight;
 
-    private MapInfo currentMap;
+    public static MapInfo CurrentMap;
 
     private List<GameObject> blockObjList = new List<GameObject>();
 

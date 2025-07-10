@@ -38,5 +38,5 @@ MonoBehaviour:
   containStar: 0
   starPosition: {x: 0, y: -1}
   steps: 4
-  bg: {fileID: 3054803451032822650, guid: 4c747c20342f4494cab96a4b3a16a003, type: 3}
+  bg: {fileID: 6427555165943116831, guid: e149738d032699e4b8b4682aeee27a75, type: 3}
   levelName: 1-1
