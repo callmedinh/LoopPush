@@ -273,7 +273,12 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Logotype_0: -1940928041859977252
+      Logotype_1: 7083932869048213725
+      Logotype_2: 701082310130898021
+      Logotype_3: -7904347617144705652
+      Logotype_4: -7242063359528591681
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

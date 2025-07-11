@@ -1,5 +1,6 @@
 using System.Collections;
 using Controller;
+using Events;
 using UI;
 using UnityEngine;
 using Utilities;
@@ -27,7 +28,7 @@ namespace Manager
             {
                 if (this.enteredLevel.blocks[i].type == BlockType.Key)
                 {
-                    this.keyPoint = MapManager.Instance.GetKeyPoint(enteredLevel);
+                    keyPoint = MapManager.Instance.GetKeyPoint(enteredLevel);
                     break;
                 }
             }
@@ -44,7 +45,8 @@ namespace Manager
             PlayerController.Instance.ClearLastLoop();
             InputManager.Enabled = true;
             MapManager.Instance.InitLevel(this.enteredLevel);
-            this.keyPoint = MapManager.Instance.GetKeyPoint(this.enteredLevel);
+            GameplayEvent.OnLoopEnded?.Invoke();
+            keyPoint = MapManager.Instance.GetKeyPoint(this.enteredLevel);
         }
 
 

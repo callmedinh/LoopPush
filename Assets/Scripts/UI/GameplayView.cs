@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Controller;
 using DG.Tweening;
 using Events;
+using Manager;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;

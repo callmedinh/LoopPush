@@ -1,103 +1,98 @@
-using System;
-using System.Collections;
 using DG.Tweening;
+using Manager;
 using UnityEngine;
 
-public class BoxController : MonoBehaviour
+namespace Controller
 {
-    public Point P
+    public class BoxController : MonoBehaviour
     {
-        get
+        public Point P
         {
-            return this.point;
+            get
+            {
+                return this.point;
+            }
         }
-    }
 
-    public bool IsSettled
-    {
-        get
+        public bool IsSettled
         {
-            return this.isSettled;
+            get
+            {
+                return this.isSettled;
+            }
         }
-    }
 
-    public void Init(Vector2Int position)
-    {
-        this.point = MapManager.Instance.GetPoint(position.x, position.y);
-        transform.position = new Vector3((float)position.x, (float)position.y, -2f);
-        this.point.IsBox = true;
-        this.isSettled = false;
-    }
-
-
-    public void Move(Direction dir)
-    {
-        Point point = null;
-        switch (dir)
+        public void Init(Vector2Int position)
         {
-            case Direction.Left:
-                point = MapManager.Instance.GetPoint(this.point.X - 1, this.point.Y);
-                break;
-            case Direction.Right:
-                point = MapManager.Instance.GetPoint(this.point.X + 1, this.point.Y);
-                break;
-            case Direction.Up:
-                point = MapManager.Instance.GetPoint(this.point.X, this.point.Y + 1);
-                break;
-            case Direction.Down:
-                point = MapManager.Instance.GetPoint(this.point.X, this.point.Y - 1);
-                break;
-        }
-        if (point == null)
-        {
-            return;
-        }
-        bool flag = false;
-        if (point.IsTele && !point.TelePoint.IsBox)
-        {
-            point = point.TelePoint;
-            flag = true;
-        }
-        this.point.IsBox = false;
-        if (flag)
-        {
-            transform.DOMove(point.TelePoint.Position, 0.1f, false);
-        }
-        else
-        {
-            transform.DOMove(point.Position + new Vector3(0f, 0f, -1f), 0.1f, false);
-        }
-        this.point = point;
-        this.point.IsBox = true;
-        if (!point.IsDst)
-        {
+            this.point = MapManager.Instance.GetPoint(position.x, position.y);
+            transform.position = new Vector3((float)position.x, (float)position.y, -2f);
+            this.point.IsBox = true;
             this.isSettled = false;
-            return;
         }
-        this.isSettled = true;
-        BoxManager.Instance.DetectBoxState();
-    }
-    public bool CanMove(Direction dir)
-    {
-        Point point = null;
-        switch (dir)
-        {
-            case Direction.Left:
-                point = MapManager.Instance.GetPoint(this.point.X - 1, this.point.Y);
-                break;
-            case Direction.Right:
-                point = MapManager.Instance.GetPoint(this.point.X + 1, this.point.Y);
-                break;
-            case Direction.Up:
-                point = MapManager.Instance.GetPoint(this.point.X, this.point.Y + 1);
-                break;
-            case Direction.Down:
-                point = MapManager.Instance.GetPoint(this.point.X, this.point.Y - 1);
-                break;
-        }
-        return point != null;
-    }
 
-    private Point point;
-    private bool isSettled;
+
+        public void Move(Direction dir)
+        {
+            Point _point = null;
+            switch (dir)
+            {
+                case Direction.Left:
+                    _point = MapManager.Instance.GetPoint(this.point.X - 1, this.point.Y);
+                    break;
+                case Direction.Right:
+                    _point = MapManager.Instance.GetPoint(this.point.X + 1, this.point.Y);
+                    break;
+                case Direction.Up:
+                    _point = MapManager.Instance.GetPoint(this.point.X, this.point.Y + 1);
+                    break;
+                case Direction.Down:
+                    _point = MapManager.Instance.GetPoint(this.point.X, this.point.Y - 1);
+                    break;
+            }
+
+            if (_point == null) return;
+
+            // Teleport logic
+            if (_point.IsTele && !_point.TelePoint.IsBox)
+            {
+                _point = _point.TelePoint;
+            }
+
+            this.point.IsBox = false;
+            transform.DOMove(_point.Position, 0.1f);
+            this.point = _point;
+            this.point.IsBox = true;
+
+            // Destination check
+            this.isSettled = this.point.IsDst;
+            if (this.isSettled)
+            {
+                BoxManager.Instance.DetectBoxState();
+            }
+        }
+
+        public bool CanMove(Direction dir)
+        {
+            Point point = null;
+            switch (dir)
+            {
+                case Direction.Left:
+                    point = MapManager.Instance.GetPoint(this.point.X - 1, this.point.Y);
+                    break;
+                case Direction.Right:
+                    point = MapManager.Instance.GetPoint(this.point.X + 1, this.point.Y);
+                    break;
+                case Direction.Up:
+                    point = MapManager.Instance.GetPoint(this.point.X, this.point.Y + 1);
+                    break;
+                case Direction.Down:
+                    point = MapManager.Instance.GetPoint(this.point.X, this.point.Y - 1);
+                    break;
+            }
+            return point != null;
+        }
+
+        private Point point;
+        private bool isSettled;
+    }
 }

@@ -15,10 +15,9 @@ namespace UI
         [SerializeField] private Button buttonPrefab;
         [SerializeField] private Transform buttonParent;
         private MapInfo[] maps;
-        
         public event Action<string> OnLevelSelected;
 
-        private void Awake()
+        private void OnEnable()
         {
             if (DeData.Instance == null) return;
             DeData.Instance.Initialize();
@@ -41,6 +40,7 @@ namespace UI
                 button.onClick.AddListener(() => OnLevelClick(levelId));
             }
         }
+
         private void OnLevelClick(string level)
         {
             GameManager.Instance.EnterLevel(level);
