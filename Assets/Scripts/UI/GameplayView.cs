@@ -1,14 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Controller;
 using DG.Tweening;
 using Events;
 using Manager;
+using ScriptableObjects;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using Utilities;
+using Random = UnityEngine.Random;
 
 namespace UI
 {
@@ -30,15 +31,30 @@ namespace UI
         [SerializeField] private Button rightDirButton;
         [SerializeField] private Button upDirButton;
         [SerializeField] private Button downDirButton;
+        [SerializeField] private Button skipTurnButton;
         [SerializeField] private Button settingButton;
+
+        public Action LeftEffectHandler;
+        public Action RightEffectHandler;
+        public Action UpEffectHandler;
+        public Action DownEffectHandler;
+        public Action SkipTurnEffectHandler;
+        
+        private Dictionary<string, InstructionSO> instructionMap = new Dictionary<string, InstructionSO>();
+
+        private void Awake()
+        {
+            LoadInstruction();
+        }
 
         private void OnDisable()
         {
-            InputEvent.OnLeftDirectionPressed -= () => leftDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            InputEvent.OnRightDirectionPressed -= () => rightDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            InputEvent.OnUpDirectionPressed -= () => upDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            InputEvent.OnDownDirectionPressed -= () => downDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-
+            InputEvent.OnLeftDirectionPressed -= LeftEffectHandler;
+            InputEvent.OnRightDirectionPressed -= RightEffectHandler;
+            InputEvent.OnUpDirectionPressed -= UpEffectHandler;
+            InputEvent.OnDownDirectionPressed -= DownEffectHandler;
+            InputEvent.OnSkipTurnButtonPressed -= SkipTurnEffectHandler;
+            
             GameplayEvent.OnPlayerStepTaken -= StepOneNode;
             GameplayEvent.OnLoopEnded -= ClearNodeStep;
             StopCoroutine(LoopFontStyle());
@@ -47,26 +63,55 @@ namespace UI
 
         private void OnEnable()
         {
+            LeftEffectHandler = () => leftDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            RightEffectHandler = () => rightDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            UpEffectHandler = () => upDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            DownEffectHandler = () => downDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            SkipTurnEffectHandler = () => skipTurnButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            
             InitTimelineNode(MapManager.CurrentMap.steps);
             StartCoroutine(LoopFontStyle());
             leftDirButton.onClick.AddListener(() => InputEvent.OnLeftDirectionPressed?.Invoke());
             rightDirButton.onClick.AddListener(() => InputEvent.OnRightDirectionPressed?.Invoke());
             upDirButton.onClick.AddListener(() => InputEvent.OnUpDirectionPressed?.Invoke());
             downDirButton.onClick.AddListener(() => InputEvent.OnDownDirectionPressed?.Invoke());
-            
-            InputEvent.OnLeftDirectionPressed += () => leftDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            InputEvent.OnRightDirectionPressed += () => rightDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            InputEvent.OnUpDirectionPressed += () => upDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            InputEvent.OnDownDirectionPressed += () => downDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            skipTurnButton.onClick.AddListener(() => InputEvent.OnSkipTurnButtonPressed?.Invoke());
 
+            InputEvent.OnLeftDirectionPressed += LeftEffectHandler;
+            InputEvent.OnRightDirectionPressed += RightEffectHandler;
+            InputEvent.OnUpDirectionPressed += UpEffectHandler;
+            InputEvent.OnDownDirectionPressed += DownEffectHandler;
+            InputEvent.OnSkipTurnButtonPressed += SkipTurnEffectHandler;
+            
             GameplayEvent.OnPlayerStepTaken += StepOneNode;
             GameplayEvent.OnLoopEnded += ClearNodeStep;
+            GameplayEvent.OnPlayerLevelChanged += OnCurrentLevelChanged;
         }
         private void Update()
         {
             foreach (var node in nodeObjList)
             {
                 node.Update();
+            }
+        }
+        private void OnCurrentLevelChanged(string levelId)
+        {
+            if (instructionMap.TryGetValue(levelId, out InstructionSO instruction))
+            {
+                instructionText.text = instruction.GetInstruction(true);
+            }
+            else
+            {
+
+            }
+        }
+        public void LoadInstruction()
+        {
+            // Load the instruction based on the levelId and language preference
+            var allInstructions = Resources.LoadAll<ScriptableObjects.InstructionSO>($"Instructions");
+            foreach (var inst in allInstructions)
+            {
+                instructionMap[inst.levelId] = inst;
             }
         }
 
@@ -91,7 +136,6 @@ namespace UI
                         instructionText.fontStyle = FontStyles.Bold | FontStyles.Italic;
                         break;
                 }
-
                 yield return new WaitForSeconds(0.5f); // thời gian giữa các lần thay đổi
             }
         }

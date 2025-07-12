@@ -1,5 +1,6 @@
 using System;
 using Audio;
+using Events;
 using Manager;
 using TMPro;
 using UnityEngine;
@@ -50,6 +51,7 @@ namespace UI
         private void OnLevelClick(string level)
         {
             GameManager.Instance.EnterLevel(level);
+            GameplayEvent.OnPlayerLevelChanged?.Invoke(level);
             UIManager.Instance.ShowView(ViewConstants.GameplayView);
         }
 
