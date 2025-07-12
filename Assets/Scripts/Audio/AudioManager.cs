@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 using Utilities;
 
 namespace Audio
@@ -7,19 +9,52 @@ namespace Audio
     {
         [SerializeField] private AudioSource musicSource;
         [SerializeField] private AudioSource sfxSource;
+        [SerializeField] private AudioMixer audioMixer;
+        private Dictionary<string, AudioClip> audioClips = new Dictionary<string, AudioClip>();
 
-        public void PlaySfx()
+        protected override void Awake()
         {
-            sfxSource.Play();
+            base.Awake();
+            LoadAudioClips();
         }
-        public void PlayMusic(AudioClip clip)
+        private void LoadAudioClips()
         {
-            musicSource.clip = clip;
-            musicSource.loop = true;
-            musicSource.Play();
+            AudioClip[] clips = Resources.LoadAll<AudioClip>("Audio");
+            foreach (var clip in clips)
+            {
+                if (!audioClips.ContainsKey(clip.name))
+                {
+                    audioClips.Add(clip.name, clip);
+                }
+            }
         }
 
-        public void StopMusic()
+        public void PlaySfx(string name)
+        {
+            if (audioClips.TryGetValue(name, out var clip))
+            {
+                sfxSource.PlayOneShot(clip);
+            }
+            else
+            {
+                Debug.LogWarning($"Audio clip '{name}' not found.");
+            }
+        }
+        public void PlayBGMMusic(string name, bool loop = false)
+        {
+            if (audioClips.TryGetValue(name, out var clip))
+            {
+                musicSource.clip = clip;
+                musicSource.loop = loop;
+                musicSource.Play();
+            }
+            else
+            {
+                Debug.LogWarning($"Audio clip '{name}' not found.");
+            }
+        }
+
+        public void StopBGMMusic()
         {
             musicSource.Stop();
         }

@@ -1,4 +1,5 @@
 using System;
+using Audio;
 using Manager;
 using TMPro;
 using UnityEngine;
@@ -15,10 +16,15 @@ namespace UI
         [SerializeField] private Button buttonPrefab;
         [SerializeField] private Transform buttonParent;
         private MapInfo[] maps;
-        public event Action<string> OnLevelSelected;
-
-        private void OnEnable()
+        private void OnDisable()
         {
+            AudioManager.Instance.StopBGMMusic();
+        }
+
+        private void OnEnable() 
+        {   
+            AudioManager.Instance.PlayBGMMusic(ClipConstants.BGM_LevelMenu);
+            ClearAllButtons();
             if (DeData.Instance == null) return;
             DeData.Instance.Initialize();
             maps = Resources.LoadAll<MapInfo>("Levels/");
@@ -45,6 +51,14 @@ namespace UI
         {
             GameManager.Instance.EnterLevel(level);
             UIManager.Instance.ShowView(ViewConstants.GameplayView);
+        }
+
+        private void ClearAllButtons()
+        {
+            foreach (var btn in buttonParent.GetComponentsInChildren<Button>())
+            {
+                Destroy(btn.gameObject);
+            }
         }
     }
 }

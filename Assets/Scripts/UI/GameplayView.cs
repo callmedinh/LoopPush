@@ -1,8 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using Controller;
 using DG.Tweening;
 using Events;
 using Manager;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,6 +23,7 @@ namespace UI
         [SerializeField] private Image nodeCircleImage;
         [SerializeField] private Transform mainTrackParent;
         [SerializeField] private Transform timelineParent;
+        [SerializeField] private TMP_Text instructionText;
         
         //Direction Button
         [SerializeField] private Button leftDirButton;
@@ -38,12 +41,14 @@ namespace UI
 
             GameplayEvent.OnPlayerStepTaken -= StepOneNode;
             GameplayEvent.OnLoopEnded -= ClearNodeStep;
+            StopCoroutine(LoopFontStyle());
             ClearAllTimeline();
         }
 
         private void OnEnable()
         {
             InitTimelineNode(MapManager.CurrentMap.steps);
+            StartCoroutine(LoopFontStyle());
             leftDirButton.onClick.AddListener(() => InputEvent.OnLeftDirectionPressed?.Invoke());
             rightDirButton.onClick.AddListener(() => InputEvent.OnRightDirectionPressed?.Invoke());
             upDirButton.onClick.AddListener(() => InputEvent.OnUpDirectionPressed?.Invoke());
@@ -62,6 +67,32 @@ namespace UI
             foreach (var node in nodeObjList)
             {
                 node.Update();
+            }
+        }
+
+        private IEnumerator LoopFontStyle()
+        {
+            while (true)
+            {
+                // Random style: 0 = Normal, 1 = Bold, 2 = Italic, 3 = BoldItalic
+                int styleIndex = Random.Range(0, 4);
+                switch (styleIndex)
+                {
+                    case 0:
+                        instructionText.fontStyle = FontStyles.Normal;
+                        break;
+                    case 1:
+                        instructionText.fontStyle = FontStyles.Bold;
+                        break;
+                    case 2:
+                        instructionText.fontStyle = FontStyles.Italic;
+                        break;
+                    case 3:
+                        instructionText.fontStyle = FontStyles.Bold | FontStyles.Italic;
+                        break;
+                }
+
+                yield return new WaitForSeconds(0.5f); // thời gian giữa các lần thay đổi
             }
         }
 

@@ -1,4 +1,5 @@
 using System.Collections;
+using Audio;
 using DG.Tweening;
 using Events;
 using Manager;
@@ -196,6 +197,7 @@ namespace Controller
         private void StepCost()
         {
             stepLeft--;
+            AudioManager.Instance.PlaySfx(ClipConstants.SFX_LevelComplete);
             GameplayEvent.OnPlayerStepTaken?.Invoke();
             if (this.stepLeft == 0)
             {

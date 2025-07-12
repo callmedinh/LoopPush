@@ -1,4 +1,5 @@
 using System.Collections;
+using Audio;
 using Controller;
 using Events;
 using UI;
@@ -52,6 +53,7 @@ namespace Manager
 
         public void LevelComplete()
         {
+            AudioManager.Instance.PlaySfx(ClipConstants.SFX_LevelComplete);
             this.isLevelComplete = true;
             InputManager.Enabled = false;
             StartCoroutine(this.WaitBackToLevel());
