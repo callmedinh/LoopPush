@@ -173,7 +173,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      wheelchair_0: -4490620890554995812
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

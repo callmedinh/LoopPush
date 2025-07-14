@@ -57,6 +57,8 @@ namespace UI
             
             GameplayEvent.OnPlayerStepTaken -= StepOneNode;
             GameplayEvent.OnLoopEnded -= ClearNodeStep;
+            GameplayEvent.OnPlayerLevelChanged += OnCurrentLevelChanged;
+
             StopCoroutine(LoopFontStyle());
             ClearAllTimeline();
         }

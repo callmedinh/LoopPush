@@ -248,7 +248,11 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      streamline-emojis_ambulance_0: 7033694166198694999
+      streamline-emojis_ambulance_1: 6021956333386299103
+      streamline-emojis_ambulance_2: 712672470696054651
+      streamline-emojis_ambulance_3: -3233372614268227846
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

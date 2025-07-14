@@ -26,15 +26,32 @@ namespace UI
         private IEnumerator LoadAsync(string sceneName)
         {
             AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
-            while (!operation.isDone)
+            operation.allowSceneActivation = false;
+
+            float targetProgress = 0f;
+            float fakeProgress = 0f;
+
+            while (fakeProgress < 0.9f)
             {
-                float progress = Mathf.Clamp01(operation.progress / 0.9f);
-                slider.value = progress;
+                fakeProgress += Time.deltaTime * 0.3f;
+                slider.value = fakeProgress;
                 yield return null;
             }
-            yield return new WaitForSeconds(0.5f);
-
+            
+            while (operation.progress < 0.9f)
+            {
+                yield return null;
+            }
+            while (slider.value < 1f)
+            {
+                slider.value += Time.deltaTime * 0.5f;
+                yield return null;
+            }
+            yield return new WaitForSeconds(0.2f);
+            operation.allowSceneActivation = true;
+            yield return new WaitForSeconds(0.3f);
             UIManager.Instance.ShowView(ViewConstants.TitleView);
         }
+
     }
 }

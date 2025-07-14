@@ -25,6 +25,11 @@ namespace Controller
         public void Init(Vector2Int position)
         {
             this.point = MapManager.Instance.GetPoint(position.x, position.y);
+            if (this.point == null)
+            {
+                Debug.LogError($"[BoxController] Box position invalid: ({position.x}, {position.y}) — no block at that position.");
+                return;
+            }
             transform.position = new Vector3((float)position.x, (float)position.y, -2f);
             this.point.IsBox = true;
             this.isSettled = false;

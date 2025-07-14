@@ -144,45 +144,34 @@ namespace Controller
                     _point = MapManager.Instance.GetPoint(this.shadowPoint.X, this.shadowPoint.Y - 1);
                     break;
             }
+
             if (_point != null)
             {
                 if (_point.IsBox)
                 {
                     if (!BoxManager.Instance.GetBox(_point).CanMove(dir))
-                    {
                         return;
-                    }
+
                     BoxManager.Instance.GetBox(_point).Move(dir);
                     if (dir == Direction.Left || dir == Direction.Right)
-                    {
                         animator.SetTrigger(Slide);
-                    }
                 }
+
                 if (_point.IsStar)
                 {
                     MapManager.Instance.DestroyStar();
                 }
-                bool flag = false;
+
                 if (_point.IsTele && !_point.TelePoint.IsBox)
                 {
                     _point = _point.TelePoint;
-                    flag = true;
                 }
-                if (_point.IsKey)
-                {
-                    this.shadowPoint = _point;
-                }
-                if (flag)
-                {
-                    this.shadow.DOMove(_point.TelePoint.Position + new Vector3(0f, 0f, -1f), 0.1f);
-                }
-                else
-                {
-                    this.shadow.DOMove(_point.Position + new Vector3(0f, 0f, -1f), 0.1f);
-                }
+
+                this.shadow.DOMove(_point.Position + new Vector3(0f, 0f, -1f), 0.1f);
                 this.shadowPoint = _point;
             }
         }
+
 
         public void SkipTurn()
         {

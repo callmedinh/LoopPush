@@ -173,7 +173,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      streamline-emojis_hospital_0: 6693275268531778709
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

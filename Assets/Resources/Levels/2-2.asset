@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa5cf05836a97024c9efb4bde3bf5ccb, type: 3}
+  m_Name: 2-2
+  m_EditorClassIdentifier: 
+  mapSize: {x: 4, y: 4}
+  blocks:
+  - type: 1
+    position: {x: 0, y: 1}
+  - type: 0
+    position: {x: 0, y: 2}
+  - type: 1
+    position: {x: 1, y: 0}
+  - type: 0
+    position: {x: 1, y: 1}
+  - type: 0
+    position: {x: 1, y: 2}
+  - type: 0
+    position: {x: 2, y: 0}
+  - type: 0
+    position: {x: 2, y: 1}
+  - type: 0
+    position: {x: 2, y: 2}
+  - type: 0
+    position: {x: 2, y: 3}
+  teleportBlocks:
+  - block1:
+      type: 2
+      position: {x: 1, y: 3}
+    block2:
+      type: 2
+      position: {x: 3, y: 0}
+  bricks: []
+  playerPosition: {x: 2, y: 3}
+  boxPositions:
+  - {x: 1, y: 2}
+  - {x: 2, y: 1}
+  containStar: 0
+  starPosition: {x: 0, y: 3}
+  steps: 5
+  bg: {fileID: 6427555165943116831, guid: e149738d032699e4b8b4682aeee27a75, type: 3}
+  levelName: 2-2

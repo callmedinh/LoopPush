@@ -9,10 +9,6 @@ namespace Manager
     public class MapManager : Singleton<MapManager>
     {
         [SerializeField] private GameplayView gameplayView;
-        protected override void Awake()
-        {
-            base.Awake();
-        }
 
         public void InitLevel(MapInfo map)
         {
@@ -39,14 +35,14 @@ namespace Manager
             if (map.containStar)
             {
                 this.starObject = Instantiate(this.starPrefab);
-                this.starObject.transform.position = new Vector3((float)map.starPosition.x, (float)map.starPosition.y, 0f);
+                this.starObject.transform.position = new Vector3(map.starPosition.x, map.starPosition.y, 0f);
                 this.GetPoint(map.starPosition.x, map.starPosition.y).IsStar = true;
             }
 
             if (map.bg != null)
             {
-                bgObject = Instantiate<GameObject>(map.bg, Camera.main.transform);
-                bgObject.transform.localPosition = Vector3.forward * 10f;   
+                if (Camera.main != null) bgObject = Instantiate<GameObject>(map.bg, Camera.main.transform);
+                bgObject.transform.localPosition = Vector3.forward * 10f;
             }
         }
 
@@ -60,13 +56,8 @@ namespace Manager
             {
                 Destroy(this.boxObjList[j]);
             }
-            for (int k = 0; k < this.brickObjList.Count; k++)
-            {
-                Destroy(this.brickObjList[k]);
-            }
             this.blockObjList.Clear();
             this.boxObjList.Clear();
-            this.brickObjList.Clear();
             Destroy(this.bgObject);
             Destroy(this.starObject);
             BoxManager.Instance.ClearBox();
@@ -80,8 +71,8 @@ namespace Manager
             BoxManager.Instance.RecoverBoxPosition(mapInfo.boxPositions);
             if (CurrentMap.containStar && this.starObject == null)
             {
-                this.starObject = Instantiate<GameObject>(this.starPrefab);
-                this.starObject.transform.position = new Vector3((float)mapInfo.starPosition.x, (float)mapInfo.starPosition.y, 0f);
+                this.starObject = Instantiate(this.starPrefab);
+                this.starObject.transform.position = new Vector3(mapInfo.starPosition.x, mapInfo.starPosition.y, 0f);
                 this.GetPoint(mapInfo.starPosition.x, mapInfo.starPosition.y).IsStar = true;
             }
         }
@@ -100,10 +91,15 @@ namespace Manager
                     original = this.keyPrefab;
                     break;
             }
-            GameObject obj = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, -1f), Quaternion.identity, base.transform);
+            GameObject obj = Instantiate(original, new Vector3(block.position.x, block.position.y, -1f), Quaternion.identity, transform);
             this.blockObjList.Add(obj);
             obj.GetComponent<BlockController>().SetTypeBlock(block.type);
             Point point = new(block.position.x, block.position.y);
+            if (block.position.x < 0 || block.position.x >= mapWidth || block.position.y < 0 || block.position.y >= mapHeight)
+            {
+                Debug.LogError($"[MapManager] Block position out of bounds: ({block.position.x}, {block.position.y}) vs mapSize ({mapWidth}, {mapHeight})");
+                return;
+            }
             this.mapPoints[block.position.x, block.position.y] = point;
             point.Position = obj.transform.position;
             if (block.type == BlockType.Teleport)
@@ -146,12 +142,12 @@ namespace Manager
                     original = this.keyPrefab;
                     break;
             }
-            GameObject gameObject = Instantiate<GameObject>(original, new Vector3((float)block.position.x, (float)block.position.y, -1f), Quaternion.identity, base.transform);
-            this.blockObjList.Add(gameObject);
-            gameObject.GetComponent<BlockController>().SetTypeBlock(block.type);
+            GameObject obj = Instantiate(original, new Vector3(block.position.x, block.position.y, -1f), Quaternion.identity, transform);
+            this.blockObjList.Add(obj);
+            obj.GetComponent<BlockController>().SetTypeBlock(block.type);
             p = new Point(block.position.x, block.position.y);
             this.mapPoints[block.position.x, block.position.y] = p;
-            p.Position = gameObject.transform.position;
+            p.Position = obj.transform.position;
             if (block.type == BlockType.Teleport)
             {
                 p.IsTele = true;
@@ -172,9 +168,9 @@ namespace Manager
         {
             for (int i = 0; i < boxPositions.Length; i++)
             {
-                GameObject gameObject = Instantiate<GameObject>(this.boxPrefab, base.transform);
-                this.boxObjList.Add(gameObject);
-                BoxController component = gameObject.GetComponent<BoxController>();
+                GameObject obj = Instantiate(this.boxPrefab, transform);
+                this.boxObjList.Add(obj);
+                BoxController component = obj.GetComponent<BoxController>();
                 component.Init(boxPositions[i]);
                 BoxManager.Instance.AddBoxToList(component);
             }
@@ -244,9 +240,7 @@ namespace Manager
         private List<GameObject> blockObjList = new List<GameObject>();
 
         private List<GameObject> boxObjList = new List<GameObject>();
-
-        private List<GameObject> brickObjList = new List<GameObject>();
-
+        
         private GameObject bgObject;
 
         private GameObject starObject;
