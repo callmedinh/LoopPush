@@ -1,103 +1,44 @@
-using DG.Tweening;
+using DefaultNamespace;
 using Manager;
 using UnityEngine;
 
 namespace Controller
 {
-    public class BoxController : MonoBehaviour
+    public class BoxController : MovableBase
     {
-        public Point P
-        {
-            get
-            {
-                return this.point;
-            }
-        }
+        private bool isSettled;
+        public bool IsSettled => currentPoint.IsDst;
+        public Point Point => currentPoint;
 
-        public bool IsSettled
+        public override void Init(Vector2Int position, float zOffset = -2f)
         {
-            get
-            {
-                return this.isSettled;
-            }
-        }
-
-        public void Init(Vector2Int position)
-        {
-            this.point = MapManager.Instance.GetPoint(position.x, position.y);
-            if (this.point == null)
-            {
-                Debug.LogError($"[BoxController] Box position invalid: ({position.x}, {position.y}) — no block at that position.");
-                return;
-            }
-            transform.position = new Vector3((float)position.x, (float)position.y, -2f);
-            this.point.IsBox = true;
-            this.isSettled = false;
+            base.Init(position);
+            currentPoint.IsBox = true;
+            isSettled = false;
         }
 
 
         public void Move(Direction dir)
         {
-            Point _point = null;
-            switch (dir)
-            {
-                case Direction.Left:
-                    _point = MapManager.Instance.GetPoint(this.point.X - 1, this.point.Y);
-                    break;
-                case Direction.Right:
-                    _point = MapManager.Instance.GetPoint(this.point.X + 1, this.point.Y);
-                    break;
-                case Direction.Up:
-                    _point = MapManager.Instance.GetPoint(this.point.X, this.point.Y + 1);
-                    break;
-                case Direction.Down:
-                    _point = MapManager.Instance.GetPoint(this.point.X, this.point.Y - 1);
-                    break;
-            }
+            var target = GetTargetPoint(dir);
+            if (target == null) return;
 
-            if (_point == null) return;
+            target = ResolveTeleport(target);
 
-            // Teleport logic
-            if (_point.IsTele && !_point.TelePoint.IsBox)
-            {
-                _point = _point.TelePoint;
-            }
+            currentPoint.IsBox = false;
+            AnimateMove(target, -2f);
+            currentPoint = target;
+            currentPoint.IsBox = true;
 
-            this.point.IsBox = false;
-            transform.DOMove(_point.Position, 0.1f);
-            this.point = _point;
-            this.point.IsBox = true;
-
-            // Destination check
-            this.isSettled = this.point.IsDst;
-            if (this.isSettled)
-            {
+            isSettled = currentPoint.IsDst;
+            if (isSettled)
                 BoxManager.Instance.DetectBoxState();
-            }
         }
 
         public bool CanMove(Direction dir)
         {
-            Point point = null;
-            switch (dir)
-            {
-                case Direction.Left:
-                    point = MapManager.Instance.GetPoint(this.point.X - 1, this.point.Y);
-                    break;
-                case Direction.Right:
-                    point = MapManager.Instance.GetPoint(this.point.X + 1, this.point.Y);
-                    break;
-                case Direction.Up:
-                    point = MapManager.Instance.GetPoint(this.point.X, this.point.Y + 1);
-                    break;
-                case Direction.Down:
-                    point = MapManager.Instance.GetPoint(this.point.X, this.point.Y - 1);
-                    break;
-            }
-            return point != null;
+            var target = GetTargetPoint(dir);
+            return target != null;
         }
-
-        private Point point;
-        private bool isSettled;
     }
 }

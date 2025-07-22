@@ -1,9 +1,6 @@
-using NUnit.Framework;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+using System;
 
-[System.Serializable]
+[Serializable]
 public class LevelData
 {
     public int Chapter;

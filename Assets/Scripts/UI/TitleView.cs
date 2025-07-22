@@ -1,8 +1,6 @@
-using System;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using Utilities;
-using DG.Tweening;
 
 namespace UI
 {
@@ -15,16 +13,14 @@ namespace UI
         {
             startButton.onClick.AddListener(OnStartButtonClicked);
             if (startButton != null)
-            {
                 startButton.transform.DOScale(1.3f, 0.5f)
                     .SetLoops(-1, LoopType.Yoyo)
                     .SetEase(Ease.InOutSine);
-            }
         }
 
         private void OnStartButtonClicked()
         {
-            UIManager.Instance.ShowView(ViewConstants.LevelView);
+            UIManager.Instance.ShowView(ScreenType.LevelSelect);
         }
     }
 }

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Controller;
-using UI;
 using UnityEngine;
 using Utilities;
 
@@ -8,20 +7,38 @@ namespace Manager
 {
     public class MapManager : Singleton<MapManager>
     {
-        [SerializeField] private GameplayView gameplayView;
+        public static MapInfo CurrentMap;
+        [SerializeField] private Pool pool;
+
+        [SerializeField] private MapInfo testMap;
+
+        [SerializeField] private GameObject bigTreeBrick;
+
+        [SerializeField] private GameObject starPrefab;
+
+        [SerializeField] private Transform playerTransform;
+
+        private readonly List<GameObject> blockObjList = new();
+
+        private GameObject bgObject;
+
+        private int mapHeight;
+
+        private Point[,] mapPoints;
+
+        private int mapWidth;
+
+        private GameObject starObject;
 
         public void InitLevel(MapInfo map)
         {
             CurrentMap = map;
             mapWidth = map.mapSize.x;
             mapHeight = map.mapSize.y;
-            mapPoints = new Point[this.mapWidth, this.mapHeight];
+            mapPoints = new Point[mapWidth, mapHeight];
 
-            for (int i = 0; i < map.blocks.Length; i++)
-            {
-                InstantiateBlock(map.blocks[i]);
-            }
-            for (int j = 0; j < map.teleportBlocks.Length; j++)
+            for (var i = 0; i < map.blocks.Length; i++) InstantiateBlock(map.blocks[i]);
+            for (var j = 0; j < map.teleportBlocks.Length; j++)
             {
                 Point p;
                 InstantiateBlock(map.teleportBlocks[j].block1, out p);
@@ -29,148 +46,101 @@ namespace Manager
                 InstantiateBlock(map.teleportBlocks[j].block2, out p2);
                 BindTeleportInfo(p, p2);
             }
+
             PlayerController.Instance.Init(map.playerPosition, map.steps);
             InstantiateBox(map.boxPositions);
             CameraController.Instance.SetPosition(map.mapSize);
             if (map.containStar)
             {
-                this.starObject = Instantiate(this.starPrefab);
-                this.starObject.transform.position = new Vector3(map.starPosition.x, map.starPosition.y, 0f);
-                this.GetPoint(map.starPosition.x, map.starPosition.y).IsStar = true;
+                starObject = Instantiate(starPrefab);
+                starObject.transform.position = new Vector3(map.starPosition.x, map.starPosition.y, 0f);
+                GetPoint(map.starPosition.x, map.starPosition.y).IsStar = true;
             }
 
             if (map.bg != null)
             {
-                if (Camera.main != null) bgObject = Instantiate<GameObject>(map.bg, Camera.main.transform);
+                if (Camera.main != null) bgObject = Instantiate(map.bg, Camera.main.transform);
                 bgObject.transform.localPosition = Vector3.forward * 10f;
             }
         }
 
         public void ClearLevel()
         {
-            for (int i = 0; i < this.blockObjList.Count; i++)
-            {
-                Destroy(this.blockObjList[i]);
-            }
-            for (int j = 0; j < this.boxObjList.Count; j++)
-            {
-                Destroy(this.boxObjList[j]);
-            }
-            this.blockObjList.Clear();
-            this.boxObjList.Clear();
-            Destroy(this.bgObject);
-            Destroy(this.starObject);
+            pool.ReturnListToPool(blockObjList);
+            blockObjList.Clear();
+            Destroy(bgObject);
+            Destroy(starObject);
             BoxManager.Instance.ClearBox();
         }
 
         public void LoopMapInit()
         {
-            MapInfo mapInfo = CurrentMap;
-            PlayerController.Instance.Init(mapInfo.playerPosition, mapInfo.steps);
+            var mapInfo = CurrentMap;
+            PlayerController.Instance.LoopInit(mapInfo.playerPosition, mapInfo.steps);
             BoxManager.Instance.ClearBoxPoint();
             BoxManager.Instance.RecoverBoxPosition(mapInfo.boxPositions);
-            if (CurrentMap.containStar && this.starObject == null)
+            if (CurrentMap.containStar && starObject == null)
             {
-                this.starObject = Instantiate(this.starPrefab);
-                this.starObject.transform.position = new Vector3(mapInfo.starPosition.x, mapInfo.starPosition.y, 0f);
-                this.GetPoint(mapInfo.starPosition.x, mapInfo.starPosition.y).IsStar = true;
+                starObject = Instantiate(starPrefab);
+                starObject.transform.position = new Vector3(mapInfo.starPosition.x, mapInfo.starPosition.y, 0f);
+                GetPoint(mapInfo.starPosition.x, mapInfo.starPosition.y).IsStar = true;
             }
         }
+
         private void InstantiateBlock(MapBlock block)
         {
-            GameObject original = this.blockPrefab;
-            switch (block.type)
-            {
-                case BlockType.End:
-                    original = this.endPrefab;
-                    break;
-                case BlockType.Teleport:
-                    original = this.telePrefab;
-                    break;
-                case BlockType.Key:
-                    original = this.keyPrefab;
-                    break;
-            }
-            GameObject obj = Instantiate(original, new Vector3(block.position.x, block.position.y, -1f), Quaternion.identity, transform);
-            this.blockObjList.Add(obj);
-            obj.GetComponent<BlockController>().SetTypeBlock(block.type);
+            var obj = pool.GetPooledObject(block.type);
+            obj.transform.position = new Vector3(block.position.x, block.position.y, -1f);
+            blockObjList.Add(obj);
             Point point = new(block.position.x, block.position.y);
-            if (block.position.x < 0 || block.position.x >= mapWidth || block.position.y < 0 || block.position.y >= mapHeight)
-            {
-                Debug.LogError($"[MapManager] Block position out of bounds: ({block.position.x}, {block.position.y}) vs mapSize ({mapWidth}, {mapHeight})");
-                return;
-            }
-            this.mapPoints[block.position.x, block.position.y] = point;
+            if (block.position.x < 0 || block.position.x >= mapWidth || block.position.y < 0 ||
+                block.position.y >= mapHeight) return;
+            mapPoints[block.position.x, block.position.y] = point;
             point.Position = obj.transform.position;
-            if (block.type == BlockType.Teleport)
-            {
-                point.IsTele = true;
-                return;
-            }
-            if (block.type == BlockType.End)
-            {
-                point.IsDst = true;
-                return;
-            }
-            if (block.type == BlockType.Key)
-            {
-                point.IsKey = true;
-            }
+            ApplyBlockType(block.type, point);
         }
 
         public void DestroyStar()
         {
-            if (this.starObject == null)
-            {
-                return;
-            }
-            Destroy(this.starObject);
+            if (starObject == null) return;
+            Destroy(starObject);
         }
 
         private void InstantiateBlock(MapBlock block, out Point p)
         {
-            GameObject original = this.blockPrefab;
-            switch (block.type)
+            var obj = pool.GetPooledObject(block.type);
+            obj.transform.position = new Vector3(block.position.x, block.position.y, -1f);
+            blockObjList.Add(obj);
+            p = new Point(block.position.x, block.position.y);
+            mapPoints[block.position.x, block.position.y] = p;
+            p.Position = obj.transform.position;
+            ApplyBlockType(block.type, p);
+        }
+
+        private void ApplyBlockType(BlockType type, Point p)
+        {
+            switch (type)
             {
-                case BlockType.End:
-                    original = this.endPrefab;
-                    break;
                 case BlockType.Teleport:
-                    original = this.telePrefab;
+                    p.IsTele = true;
+                    break;
+                case BlockType.End:
+                    p.IsDst = true;
                     break;
                 case BlockType.Key:
-                    original = this.keyPrefab;
+                    p.IsKey = true;
                     break;
-            }
-            GameObject obj = Instantiate(original, new Vector3(block.position.x, block.position.y, -1f), Quaternion.identity, transform);
-            this.blockObjList.Add(obj);
-            obj.GetComponent<BlockController>().SetTypeBlock(block.type);
-            p = new Point(block.position.x, block.position.y);
-            this.mapPoints[block.position.x, block.position.y] = p;
-            p.Position = obj.transform.position;
-            if (block.type == BlockType.Teleport)
-            {
-                p.IsTele = true;
-                return;
-            }
-            if (block.type == BlockType.End)
-            {
-                p.IsDst = true;
-                return;
-            }
-            if (block.type == BlockType.Key)
-            {
-                p.IsKey = true;
             }
         }
 
+
         private void InstantiateBox(Vector2Int[] boxPositions)
         {
-            for (int i = 0; i < boxPositions.Length; i++)
+            for (var i = 0; i < boxPositions.Length; i++)
             {
-                GameObject obj = Instantiate(this.boxPrefab, transform);
-                this.boxObjList.Add(obj);
-                BoxController component = obj.GetComponent<BoxController>();
+                var obj = pool.GetPooledObject(BlockType.Box);
+                blockObjList.Add(obj);
+                var component = obj.GetComponent<BoxController>();
                 component.Init(boxPositions[i]);
                 BoxManager.Instance.AddBoxToList(component);
             }
@@ -184,65 +154,17 @@ namespace Manager
 
         public Point GetPoint(int x, int y)
         {
-            if (x < 0 || x > this.mapWidth - 1 || y < 0 || y > this.mapHeight - 1)
-            {
-                return null;
-            }
-            return this.mapPoints[x, y];
+            if (x < 0 || x > mapWidth - 1 || y < 0 || y > mapHeight - 1) return null;
+            return mapPoints[x, y];
         }
 
         public Point GetKeyPoint(MapInfo level)
         {
-            for (int i = 0; i < level.blocks.Length; i++)
-            {
+            for (var i = 0; i < level.blocks.Length; i++)
                 if (level.blocks[i].type == BlockType.Key)
-                {
-                    return this.GetPoint(level.blocks[i].position.x, level.blocks[i].position.y);
-                }
-            }
+                    return GetPoint(level.blocks[i].position.x, level.blocks[i].position.y);
+
             return null;
         }
-        [SerializeField]
-        private MapInfo testMap;
-
-        [SerializeField]
-        private GameObject blockPrefab;
-
-        [SerializeField]
-        private GameObject endPrefab;
-
-        [SerializeField]
-        private GameObject telePrefab;
-
-        [SerializeField]
-        private GameObject keyPrefab;
-
-        [SerializeField]
-        private GameObject boxPrefab;
-
-        [SerializeField]
-        private GameObject bigTreeBrick;
-
-        [SerializeField]
-        private GameObject starPrefab;
-
-        [SerializeField]
-        private Transform playerTransform;
-
-        private Point[,] mapPoints;
-
-        private int mapWidth;
-
-        private int mapHeight;
-
-        public static MapInfo CurrentMap;
-
-        private List<GameObject> blockObjList = new List<GameObject>();
-
-        private List<GameObject> boxObjList = new List<GameObject>();
-        
-        private GameObject bgObject;
-
-        private GameObject starObject;
     }
 }

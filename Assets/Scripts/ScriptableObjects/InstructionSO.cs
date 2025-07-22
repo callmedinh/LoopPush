@@ -8,6 +8,7 @@ namespace ScriptableObjects
         public string levelId;
         [TextArea] public string instructionVN;
         [TextArea] public string instructionEN;
+
         public string GetInstruction(bool isVN)
         {
             return isVN ? instructionVN : instructionEN;

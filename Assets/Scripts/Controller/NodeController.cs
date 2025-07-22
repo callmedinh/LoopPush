@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,11 +5,11 @@ namespace Controller
 {
     public class NodeController
     {
-        private Image bridgeImg;
-        private Image circleImg;
-        private float animTime = 0.1f;
-        private float timer = 0f;
-        private bool isFilling = false;
+        private readonly float animTime = 0.1f;
+        private readonly Image bridgeImg;
+        private readonly Image circleImg;
+        private bool isFilling;
+        private float timer;
 
         public NodeController(Image bridge, Image circle)
         {
@@ -27,9 +26,9 @@ namespace Controller
         public void Update()
         {
             if (!isFilling) return;
-            
+
             timer += Time.deltaTime;
-            float t = Mathf.Clamp01(timer / animTime);
+            var t = Mathf.Clamp01(timer / animTime);
             bridgeImg.fillAmount = t;
 
             if (t >= 1f)
@@ -38,12 +37,11 @@ namespace Controller
                 isFilling = false;
             }
         }
-       
+
         public void ClearFill()
         {
-            bridgeImg.fillAmount = (this.circleImg.fillAmount = 0f);
+            bridgeImg.fillAmount = circleImg.fillAmount = 0f;
             isFilling = false;
         }
-
     }
 }

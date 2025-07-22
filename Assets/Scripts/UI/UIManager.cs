@@ -6,33 +6,30 @@ namespace UI
 {
     public class UIManager : Singleton<UIManager>
     {
-        Dictionary<string, UIBaseView> views = new Dictionary<string, UIBaseView>();
         [SerializeField] private UIBaseView loadingView;
         [SerializeField] private UIBaseView titleView;
         [SerializeField] private UIBaseView levelSelectView;
         [SerializeField] private UIBaseView gameplayView;
+        private readonly Dictionary<ScreenType, UIBaseView> views = new();
         private UIBaseView currentView;
 
         protected override void Awake()
         {
             base.Awake();
             //add view into hashmap
-            views.Add(ViewConstants.LoadingView, loadingView);
-            views.Add(ViewConstants.TitleView, titleView);
-            views.Add(ViewConstants.LevelView, levelSelectView);
-            views.Add(ViewConstants.GameplayView, gameplayView);
-            
-            foreach (var view in views)
-            {
-                view.Value.Hide();
-            }
+            views.Add(ScreenType.Loading, loadingView);
+            views.Add(ScreenType.Title, titleView);
+            views.Add(ScreenType.LevelSelect, levelSelectView);
+            views.Add(ScreenType.Gameplay, gameplayView);
+
+            foreach (var view in views) view.Value.Hide();
             currentView = loadingView;
             currentView.Show();
         }
 
-        public void ShowView(string viewName)
+        public void ShowView(ScreenType viewType)
         {
-            if (views.TryGetValue(viewName, out var view))
+            if (views.TryGetValue(viewType, out var view))
             {
                 if (currentView != null) currentView.Hide();
                 currentView = view;
@@ -40,20 +37,22 @@ namespace UI
             }
         }
 
-        public void ShowPopup(string viewName)
+        public void ShowPopup(ScreenType viewType)
         {
-            if (views.TryGetValue(viewName, out var view))
-            {
-                view.Show();
-            }
+            if (views.TryGetValue(viewType, out var view)) view.Show();
         }
 
-        public void HidePopup(string viewName)
+        public void HidePopup(ScreenType viewType)
         {
-            if (views.TryGetValue(viewName, out var view))
-            {
-                view.Hide();
-            }
+            if (views.TryGetValue(viewType, out var view)) view.Hide();
         }
+    }
+
+    public enum ScreenType
+    {
+        Loading,
+        Title,
+        LevelSelect,
+        Gameplay
     }
 }

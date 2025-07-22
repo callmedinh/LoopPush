@@ -15,17 +15,13 @@ namespace UI
 {
     public class GameplayView : UIBaseView
     {
-        private int nodeCount;
-        private int currentNode;
-        private List<NodeController> nodeObjList = new List<NodeController>();
-
         [SerializeField] private Image circleImage;
         [SerializeField] private Image bridgeImage;
         [SerializeField] private Image nodeCircleImage;
         [SerializeField] private Transform mainTrackParent;
         [SerializeField] private Transform timelineParent;
         [SerializeField] private TMP_Text instructionText;
-        
+
         //Direction Button
         [SerializeField] private Button leftDirButton;
         [SerializeField] private Button rightDirButton;
@@ -34,43 +30,40 @@ namespace UI
         [SerializeField] private Button skipTurnButton;
         [SerializeField] private Button settingButton;
 
-        public Action LeftEffectHandler;
-        public Action RightEffectHandler;
-        public Action UpEffectHandler;
+        private readonly Dictionary<string, InstructionSO> instructionMap = new();
+        private readonly List<NodeController> nodeObjList = new();
+        private int currentNode;
         public Action DownEffectHandler;
+
+        public Action LeftEffectHandler;
+        private int nodeCount;
+        public Action RightEffectHandler;
         public Action SkipTurnEffectHandler;
-        
-        private Dictionary<string, InstructionSO> instructionMap = new Dictionary<string, InstructionSO>();
+        public Action UpEffectHandler;
 
         private void Awake()
         {
             LoadInstruction();
         }
 
-        private void OnDisable()
+        private void Update()
         {
-            InputEvent.OnLeftDirectionPressed -= LeftEffectHandler;
-            InputEvent.OnRightDirectionPressed -= RightEffectHandler;
-            InputEvent.OnUpDirectionPressed -= UpEffectHandler;
-            InputEvent.OnDownDirectionPressed -= DownEffectHandler;
-            InputEvent.OnSkipTurnButtonPressed -= SkipTurnEffectHandler;
-            
-            GameplayEvent.OnPlayerStepTaken -= StepOneNode;
-            GameplayEvent.OnLoopEnded -= ClearNodeStep;
-            GameplayEvent.OnPlayerLevelChanged += OnCurrentLevelChanged;
-
-            StopCoroutine(LoopFontStyle());
-            ClearAllTimeline();
+            foreach (var node in nodeObjList) node.Update();
         }
 
         private void OnEnable()
         {
-            LeftEffectHandler = () => leftDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            RightEffectHandler = () => rightDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            UpEffectHandler = () => upDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            DownEffectHandler = () => downDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            SkipTurnEffectHandler = () => skipTurnButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
-            
+            LeftEffectHandler = () =>
+                leftDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            RightEffectHandler = () =>
+                rightDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            UpEffectHandler = () =>
+                upDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            DownEffectHandler = () =>
+                downDirButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+            SkipTurnEffectHandler = () =>
+                skipTurnButton.transform.DOScale(1.2f, 0.2f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutBounce);
+
             InitTimelineNode(MapManager.CurrentMap.steps);
             StartCoroutine(LoopFontStyle());
             leftDirButton.onClick.AddListener(() => InputEvent.OnLeftDirectionPressed?.Invoke());
@@ -84,37 +77,39 @@ namespace UI
             InputEvent.OnUpDirectionPressed += UpEffectHandler;
             InputEvent.OnDownDirectionPressed += DownEffectHandler;
             InputEvent.OnSkipTurnButtonPressed += SkipTurnEffectHandler;
-            
+
             GameplayEvent.OnPlayerStepTaken += StepOneNode;
             GameplayEvent.OnLoopEnded += ClearNodeStep;
             GameplayEvent.OnPlayerLevelChanged += OnCurrentLevelChanged;
         }
-        private void Update()
+
+        private void OnDisable()
         {
-            foreach (var node in nodeObjList)
-            {
-                node.Update();
-            }
+            InputEvent.OnLeftDirectionPressed -= LeftEffectHandler;
+            InputEvent.OnRightDirectionPressed -= RightEffectHandler;
+            InputEvent.OnUpDirectionPressed -= UpEffectHandler;
+            InputEvent.OnDownDirectionPressed -= DownEffectHandler;
+            InputEvent.OnSkipTurnButtonPressed -= SkipTurnEffectHandler;
+
+            GameplayEvent.OnPlayerStepTaken -= StepOneNode;
+            GameplayEvent.OnLoopEnded -= ClearNodeStep;
+            GameplayEvent.OnPlayerLevelChanged += OnCurrentLevelChanged;
+
+            StopCoroutine(LoopFontStyle());
+            ClearAllTimeline();
         }
+
         private void OnCurrentLevelChanged(string levelId)
         {
-            if (instructionMap.TryGetValue(levelId, out InstructionSO instruction))
-            {
+            if (instructionMap.TryGetValue(levelId, out var instruction))
                 instructionText.text = instruction.GetInstruction(true);
-            }
-            else
-            {
-
-            }
         }
+
         public void LoadInstruction()
         {
             // Load the instruction based on the levelId and language preference
-            var allInstructions = Resources.LoadAll<ScriptableObjects.InstructionSO>($"Instructions");
-            foreach (var inst in allInstructions)
-            {
-                instructionMap[inst.levelId] = inst;
-            }
+            var allInstructions = Resources.LoadAll<InstructionSO>("Instructions");
+            foreach (var inst in allInstructions) instructionMap[inst.levelId] = inst;
         }
 
         private IEnumerator LoopFontStyle()
@@ -122,7 +117,7 @@ namespace UI
             while (true)
             {
                 // Random style: 0 = Normal, 1 = Bold, 2 = Italic, 3 = BoldItalic
-                int styleIndex = Random.Range(0, 4);
+                var styleIndex = Random.Range(0, 4);
                 switch (styleIndex)
                 {
                     case 0:
@@ -138,6 +133,7 @@ namespace UI
                         instructionText.fontStyle = FontStyles.Bold | FontStyles.Italic;
                         break;
                 }
+
                 yield return new WaitForSeconds(0.5f); // thời gian giữa các lần thay đổi
             }
         }
@@ -147,11 +143,10 @@ namespace UI
             ClearAllTimeline();
             nodeCount = count;
             currentNode = 0;
-            for (int i = 0; i <= count; i++)
-            {
+            for (var i = 0; i <= count; i++)
                 if (i == 0)
                 {
-                    Instantiate(circleImage, timelineParent);   
+                    Instantiate(circleImage, timelineParent);
                     Instantiate(nodeCircleImage, mainTrackParent);
                 }
                 else
@@ -159,40 +154,33 @@ namespace UI
                     Instantiate(bridgeImage, timelineParent);
                     Instantiate(circleImage, timelineParent);
 
-                    Image bridge = Instantiate(bridgeImage, mainTrackParent);
-                    Image circle = Instantiate(nodeCircleImage, mainTrackParent);
-                    NodeController node = new NodeController(bridge, circle);
+                    var bridge = Instantiate(bridgeImage, mainTrackParent);
+                    var circle = Instantiate(nodeCircleImage, mainTrackParent);
+                    var node = new NodeController(bridge, circle);
                     node.ClearFill();
                     nodeObjList.Add(node);
                 }
-            }
         }
+
         public void StepOneNode()
         {
             if (currentNode < nodeCount)
             {
-                nodeObjList[this.currentNode].StartFill();
-                currentNode++;   
+                nodeObjList[currentNode].StartFill();
+                currentNode++;
             }
         }
+
         public void ClearNodeStep()
         {
-            for (int i = 0; i < this.nodeObjList.Count; i++)
-            {
-                nodeObjList[i].ClearFill();
-            }
+            for (var i = 0; i < nodeObjList.Count; i++) nodeObjList[i].ClearFill();
             currentNode = 0;
         }
+
         private void ClearAllTimeline()
         {
-            foreach (Transform child in timelineParent)
-            {
-                Destroy(child.gameObject);
-            }
-            foreach (Transform child in mainTrackParent)
-            {
-                Destroy(child.gameObject);
-            }
+            foreach (Transform child in timelineParent) Destroy(child.gameObject);
+            foreach (Transform child in mainTrackParent) Destroy(child.gameObject);
             nodeObjList.Clear();
             currentNode = 0;
         }

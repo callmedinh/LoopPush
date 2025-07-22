@@ -6,24 +6,22 @@ namespace UI
     {
         public virtual void Show()
         {
-            this.gameObject.SetActive(true);
+            gameObject.SetActive(true);
             OnShow();
         }
 
         public virtual void Hide()
         {
             OnHide();
-            this.gameObject.SetActive(false);
+            gameObject.SetActive(false);
         }
 
         public virtual void OnShow()
         {
-            
         }
 
         public virtual void OnHide()
         {
-            
         }
     }
 }

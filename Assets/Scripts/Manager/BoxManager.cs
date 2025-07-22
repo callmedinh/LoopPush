@@ -7,6 +7,8 @@ namespace Manager
 {
     public class BoxManager : Singleton<BoxManager>
     {
+        private readonly List<BoxController> boxList = new();
+
         protected override void Awake()
         {
             base.Awake();
@@ -14,59 +16,46 @@ namespace Manager
 
         public void AddBoxToList(BoxController bc)
         {
-            this.boxList.Add(bc);
+            boxList.Add(bc);
         }
 
         public BoxController GetBox(Point p)
         {
-            for (int i = 0; i < this.boxList.Count; i++)
-            {
-                if (this.boxList[i].P == p)
-                {
-                    return this.boxList[i];
-                }
-            }
+            for (var i = 0; i < boxList.Count; i++)
+                if (boxList[i].Point == p)
+                    return boxList[i];
+
             return null;
         }
 
         public BoxController GetBox(int x, int y)
         {
-            return this.GetBox(MapManager.Instance.GetPoint(x, y));
+            return GetBox(MapManager.Instance.GetPoint(x, y));
         }
+
         public void ClearBoxPoint()
         {
-            for (int i = 0; i < this.boxList.Count; i++)
-            {
-                this.boxList[i].P.IsBox = false;
-            }
+            for (var i = 0; i < boxList.Count; i++) boxList[i].Point.IsBox = false;
         }
+
         public void ClearBox()
         {
-            this.boxList.Clear();
+            boxList.Clear();
         }
+
         public void RecoverBoxPosition(Vector2Int[] boxPositions)
         {
-            if (boxPositions.Length != this.boxList.Count)
-            {
-                return;
-            }
-            for (int i = 0; i < boxPositions.Length; i++)
-            {
-                this.boxList[i].Init(boxPositions[i]);
-            }
+            if (boxPositions.Length != boxList.Count) return;
+            for (var i = 0; i < boxPositions.Length; i++) boxList[i].Init(boxPositions[i]);
         }
 
         public void DetectBoxState()
         {
-            for (int i = 0; i < this.boxList.Count; i++)
-            {
-                if (!this.boxList[i].IsSettled)
-                {
+            for (var i = 0; i < boxList.Count; i++)
+                if (!boxList[i].IsSettled)
                     return;
-                }
-            }
+
             GameManager.Instance.LevelComplete();
         }
-        private List<BoxController> boxList = new List<BoxController>();
     }
 }
